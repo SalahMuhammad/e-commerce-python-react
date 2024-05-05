@@ -12,6 +12,8 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 
 from pathlib import Path
 
+import os
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -45,9 +47,12 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    # my input
+    'backend.middleware.JSONOnlyMiddleware',
+    # 
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    # 
+    # my input
     "corsheaders.middleware.CorsMiddleware",
     # 
     'django.middleware.common.CommonMiddleware',
@@ -62,7 +67,9 @@ ROOT_URLCONF = 'backend.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [
+          os.path.join(BASE_DIR, 'dist'),
+        ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -143,17 +150,23 @@ REST_FRAMEWORK = {
     'PAGE_SIZE': 12
 }
 
-# STATIC_URL = 'static/'
+STATIC_URL = 'dist/'
 
-# STATICFILES_DIRS = [
-#     BASE_DIR / "static",
-# ]
+STATICFILES_DIRS = [
+    BASE_DIR / "dist",
+]
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
 
 CORS_ALLOW_ALL_ORIGINS = True
+# CORS_ALLOWED_ORIGINS = [
+#     "https://example.com",
+#     "https://sub.example.com",
+#     "http://localhost:5173",
+#     "http://127.0.0.1:5173",
+# ]
 # if we dont set this the client side won't be able to get cookies that we set in server side
 # CORS_ALLOW_CREDENTIALS = True
 
@@ -161,11 +174,14 @@ CORS_ALLOW_ALL_ORIGINS = True
 AUTH_USER_MODEL = 'users.User'
 
 # 
-# email verification secret key
-EMAIL_VERIFICATION_SECRET_KEY = []
+# jwt secret key
+JWT_SECRET_KEY = 'o2)fe2j^FF(823h9f0F(#hsh8H*&#^ois&(&f*Fd9f977d&F65d)ij)'
+
+APPEND_SLASH = False
 
 # ALLOWED_CONTENT_TYPES = [
-#     # 'application/json',
-#     # 'application/xml',
+#     'application/json',
+#     'application/xml',
+#     'multipart/form-data',
 #     # Add any other content types you want to allow
 # ]

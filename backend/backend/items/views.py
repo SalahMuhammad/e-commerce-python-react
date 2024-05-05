@@ -14,12 +14,17 @@ from rest_framework.response import Response
 # 
 from rest_framework.exceptions import UnsupportedMediaType
 from rest_framework import status
+# 
+from users.authentication import CustomAuthentication
+from rest_framework.permissions import IsAuthenticated
 
 
 
 class ItemsList(mixins.ListModelMixin, 
                mixins.CreateModelMixin,
                generics.GenericAPIView):
+  # authentication_classes = [CustomAuthentication]
+  # permission_classes = [IsAuthenticated]
   queryset = Items.objects.all()
   serializer_class = ItemsSerializer
 
@@ -44,10 +49,6 @@ class ItemsList(mixins.ListModelMixin,
     return queryset
 
   def post(self, request, *args, **kwargs):
-    if 'application/json' not in request.content_type:
-      message = {'detail': 'Unsupported media type: ' + request.content_type}
-      return Response(message, status=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE) 
-
     return self.create(request, *args, **kwargs)
 
 class ItemDetail(mixins.RetrieveModelMixin, 
