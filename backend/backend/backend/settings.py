@@ -27,7 +27,7 @@ SECRET_KEY = 'django-insecure-yky45*rz(_#(lrg&ul5askffrikqb5z#n-n-$5sxyci)!n*c1%
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['192.168.1.10:8000','*']
 
 
 # Application definition
@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     # myInput
     'items.apps.ItemsConfig',
+    'warehouses.apps.WarehousesConfig',
     'users.apps.UsersConfig',
     'rest_framework',
     "corsheaders",
@@ -141,13 +142,20 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # 
 # 
 # 
-
+LANGUAGE_CODE = "ar-eg"
 REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
     # 'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.CursorPagination',
     # 'DEFAULT_PAGINATION_CLASS': 'apps.core.pagination.StandardResultsSetPagination',
     # 'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 12
+    'PAGE_SIZE': 12,
+
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'auth.authentication.CustomAuthentication',
+    ),
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',
+    ),
 }
 
 STATIC_URL = 'dist/'

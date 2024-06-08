@@ -22,6 +22,8 @@ class JWTUtilities:
       return f'jwt.ExpiredSignatureError: {str(e)}.', False
     except jwt.InvalidSignatureError as e:
       return f'jwt.InvalidSignatureError: {str(e)}.', False
+    except Exception as e:
+      return e, False
   
 
   @staticmethod

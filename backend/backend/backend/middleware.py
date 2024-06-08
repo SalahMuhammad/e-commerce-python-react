@@ -9,9 +9,9 @@ class JSONOnlyMiddleware:
     content_type = request.content_type
     method = request.method
 
-    if method == 'OPTIONS':
+    if method in ('OPTIONS', 'DELETE'):
       return self.get_response(request)
-
+    
     if not content_type == 'application/json' and method not in ['GET']:
       return JsonResponse(
         {

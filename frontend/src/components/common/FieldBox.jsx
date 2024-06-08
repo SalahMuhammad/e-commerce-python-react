@@ -1,4 +1,5 @@
-export default function FieldBox({ label, inputAttributes, errorMessage = "" }) {
+
+export default function FieldBox({ label, inputAttributes, errorMessage = "", focus }) {
 	const id = label.split(' ').join('-')
 
 	if (!inputAttributes.type) {
@@ -9,9 +10,13 @@ export default function FieldBox({ label, inputAttributes, errorMessage = "" }) 
 		inputAttributes.disabled = false
 	}
 
+	if (!focus) {
+		focus = false
+	}
+
 	return (
 		<div className="input-boxxx mt-4">
-			<input id={id} {...inputAttributes} />
+			<input id={id} {...inputAttributes} autoFocus={focus} />
 			<label htmlFor={id} className={inputAttributes.value && "active"}>
 				{label}
 			</label>
@@ -19,3 +24,4 @@ export default function FieldBox({ label, inputAttributes, errorMessage = "" }) 
 		</div>
 	);
 }
+

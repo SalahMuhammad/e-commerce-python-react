@@ -1,20 +1,21 @@
 import { useNavigate } from "react-router-dom"
-import Dialog from "../common/Dialog"
-import { useEffect, useState } from "react"
+import MyGroup from "../common/FormGroup"
+import Form from 'react-bootstrap/Form';
+import MyModal from "../common/Modal"
+import { useState } from "react"
+import { useData2 } from "../custom-hooks/useData";
+import { sendRequest } from "../api";
+import { notify } from "../notification";
+import { setCookie } from "../utilities";
 
-export const percents = {
-    2: .10,
-    3: .2,
-    4: .4,
-}
 
 export default function ProfitPercent() {
     const [data, setData] = useState({
-        2: 0,
-        3: 0,
-        4: 0
+        price2: '',
+        price3: '',
+        price4: '',
     })
-    const [isLoading, setIsLoading] = useState(true);
+    const { loading, error } = useData2('api/pp/', setData)
     const navigate = useNavigate()
 
     function handleChange(e) {
@@ -26,60 +27,64 @@ export default function ProfitPercent() {
             })
         )
     }
-// #######################################################################
-//     Separation of Concerns: It's generally a good practice to separate your data fetching logic from your component rendering logic. This makes your code more modular and easier to maintain. Consider moving the data fetching logic to a separate function or a custom hook.
-// Error Handling: You should handle errors that may occur during the data fetching process. Use try-catch blocks or .catch() methods to catch any errors and handle them gracefully, such as displaying an error message to the user or retrying the fetch operation.
-// #######################################################################
-    useEffect(() => {
-        // fetch data from the server
-        // data fetched
-        try {
-            setData(percents)
-        } catch {
-            console.log('error')
-        } finally {
-            setIsLoading(false)
-        }
-        
-    }, [])
+    
+    const commonAttribute = {
+        type: "number",
+        step: "any",
+        onChange: handleChange,
+    }
+
+    const handleSubmit = async () => {
+		
+		const res = await sendRequest('post', `api/pp/`, data)
+
+		if (typeof(res.status) == 'number' && (res.status === 200 | res.status === 201 | res.status == 204)) {
+			notify('success', 'تم تحديث نسب الربح بنجاح 👍')
+            setCookie('pp', JSON.stringify(data), 365)
+            navigate('../')
+            return
+		}
+
+		if (res['details']) {
+            notify('error', res['details'])
+            return
+		}
+
+        console.log(res)
+	}	
 
     return (
-        <Dialog title={"تحديد نسب الربح"}>
-            {isLoading ? (
-                <div>Loading...</div>
-            ) : (
-                <form onSubmit={(e) => {
-                    e.preventDefault()
-                    navigate(-1)
-                }}>
-                    <div className="mb-3">
-                        <span>نسب الربح :</span>
-                    </div>
-                    <div className="mb-3">
-                        <input type="text" className="form-control" placeholder="خاص" name="2" value={data[2]} onChange={handleChange} />
-                    </div>
-                    <div className="mb-3">
-                        <input type="text" className="form-control" placeholder="جمله" name="3" value={data[3]} onChange={handleChange} />
-                    </div>
-                    <div className="mb-3">
-                        <input type="text" className="form-control" placeholder="قطاعى" name="4" value={data[4]} onChange={handleChange} />
-                    </div>
-    
-                    <hr />
-    
-                    <div className="mb-3">
-                        <input
-                            type="button"
-                            className="btn btn-danger"
-                            value={'الغاء'}
-                            onClick={() => {
-                                    navigate(-1)
-                                }
-                            } />
-                        <input type="submit" className="btn btn-success" value={'حفظ'} />
-                    </div>
-                </form>
-            )}
-        </Dialog>
+        <MyModal title={"تحديد نسب الربح"} onSubmit={handleSubmit}>
+            {loading && <span style={{color: 'red'}}>جار التحميل...</span>}
+            <Form>
+                <MyGroup label='خاص' feedback={'error'}> 
+                    <Form.Control
+                        name='price2'
+                        value={data.price2}
+                        placeholder="خاص"
+                        {...commonAttribute}
+                        autoFocus
+                    />
+                </MyGroup>
+
+                <MyGroup label='جمله' feedback={'error'}> 
+                    <Form.Control
+                        name='price3'
+                        value={data.price3}
+                        placeholder="جمله"
+                        {...commonAttribute}
+                    />
+                </MyGroup>
+
+                <MyGroup label='قطاعى' feedback={'error'}> 
+                    <Form.Control
+                        name='price4'
+                        value={data.price4}
+                        placeholder="قطاعى"
+                        {...commonAttribute}
+                    />
+                </MyGroup>
+            </Form>
+        </MyModal>
     )
 }

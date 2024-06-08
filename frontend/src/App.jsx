@@ -1,13 +1,18 @@
-import { createBrowserRouter, BrowserRouter as Router, createRoutesFromElements, RouterProvider, Routes, Route, Outlet } from 'react-router-dom'
+import { createBrowserRouter, BrowserRouter as Router, createRoutesFromElements, RouterProvider, Routes, Route, Outlet, useNavigate, Navigate } from 'react-router-dom'
 // toast norification init
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 // custom components
 import Header from "./components/header/Header"
 import Login from './components/login/Login';
-import ItemsTable from './components/items/table/ItemsTable';
-import ItemForm from './components/items/ItemForm'
+import Items from './components/items/Items';
+
 import ProfitPercent from './components/items/ProfitPercent';
+import Modal from './components/common/Modal';
+import PageNotFound from './components/common/404';
+import ItemsForm from './components/items/ItemsForm';
+import Repositories from './components/repositories/Repositories';
+import RepositoriesForm from './components/repositories/RepositoriesForm';
 
 
 const router = createBrowserRouter(
@@ -19,9 +24,9 @@ const router = createBrowserRouter(
 					<Outlet />
 				</>
 			}
-			errorElement={<p>404 هذا العنوان غير موجود &#128565;</p>
-			}>
-			<Route path="/"
+			errorElement={<PageNotFound/>} >
+			<Route 
+				path="/"
 				// the matching param might be available to the loader
 				loader={({ params }) => {
 					// console.log(params["lang"]); // get lang param, ? means optional /:lang?/categories
@@ -32,27 +37,28 @@ const router = createBrowserRouter(
 				element={<Login />} />
 
 
-
+{/* loader={({ params }) => {console.log(params)}} */}
 			{/* </Route> */}
 			{/* <Route path="" element={<Login />} /> */}
-			<Route path="/الاصناف" element={<ItemsTable />}>
-				<Route
-					path='اضافه-صنف-جديد'
-					element={
-						<ItemForm />
-					} />
-				<Route 
-					path='نسب-الربح' 
-					element={
-						<ProfitPercent />
-				} />
+			<Route path="/الاصناف" element={<Items />}>
+				<Route path='ادراج' element={<ItemsForm />} />
+				<Route path='تعديل/:id' element={<ItemsForm />} />
+				<Route path='نسب-الربح' element={<ProfitPercent />} />
 			</Route>
+			<Route path="/المخازن" element={<Repositories />}>
+				<Route path='ادراج' element={<RepositoriesForm />} />
+				<Route path='تعديل/:id' element={<RepositoriesForm />} />
+			</Route>
+			<Route path='/s' element={<Modal></Modal>}></Route>
+			<Route path="*" element={<PageNotFound />} />
 		</Route>
 	)
 );
 
 
-// const router = createBrowserRouter([
+
+
+// const router = createBr owserRouter([
 //   {
 //     path: '/',
 //     element: <p>fdsfdfffs</p>,

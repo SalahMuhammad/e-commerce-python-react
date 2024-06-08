@@ -4,16 +4,15 @@ from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 
-from .authentication import CustomAuthentication
+from auth.authentication import CustomAuthentication
 from .models import User
 from .serializers import UserSerializers
-from .utilities import JWTUtilities
+from auth.utilities import JWTUtilities
 import datetime
+from rest_framework.permissions import AllowAny
 
 
 class RegisterView(APIView):
-  authentication_classes = [CustomAuthentication]
-  permission_classes = [IsAuthenticated]
   serializer_class = UserSerializers
 
   def post(self, request):
@@ -27,8 +26,8 @@ class RegisterView(APIView):
   
 
 class LoginView(APIView):
-  # authentication_classes = [CustomAuthentication]
-  # permission_classes = [IsAuthenticated]
+  permission_classes = [AllowAny]
+
   def post(self, request):
     try:
       username = request.data['username']
@@ -59,8 +58,6 @@ class LoginView(APIView):
 
 
 class UserView(APIView):
-  authentication_classes = [CustomAuthentication]
-  permission_classes = [IsAuthenticated]
   
   def get(self, request):
     # user = User.objects.filter(pk=payload['id']).first()
@@ -70,8 +67,6 @@ class UserView(APIView):
 
 
 class LogoutView(APIView):
-  authentication_classes = [CustomAuthentication]
-  permission_classes = [IsAuthenticated]
   
   def post(self, request):
     response = Response()

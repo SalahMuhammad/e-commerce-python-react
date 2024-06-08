@@ -14,6 +14,9 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/items/', include('items.urls')),
     path('api/users/', include('users.urls')),
+    path('api/repositories/', include('warehouses.urls')),
     path('api-auth/', include('rest_framework.urls')),
     # re_path(r'^(?:.*)/?$', abc),
+    # 
+    path('api/pp/', include('pp.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
