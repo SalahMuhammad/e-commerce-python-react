@@ -15,7 +15,7 @@ const Tooltip = ({ obj }) => {
 		</Popover>
 
 	return (
-	<OverlayTrigger trigger="click" placement="top" overlay={popover}>
+	<OverlayTrigger trigger="click" placement="top" overlay={popover} rootClose>
 		{/* <Button variant="success">{Children}</Button> */}
 		<i className="fa-solid fa-circle-info"></i>
 	</OverlayTrigger>

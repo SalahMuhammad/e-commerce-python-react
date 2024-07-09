@@ -1,4 +1,3 @@
-import { useNavigate } from "react-router-dom";
 import axiosInstance from "./axiosInstance";
 import { notify } from "./notification";
 
@@ -20,9 +19,9 @@ export function sendRequest(method, url, data, message) {
 						notify('success', `تم حذف ${message} بنجاح... 👍`)
 						break
 					default:
-						return response
+						return {success: response}
 				}
-				return {}
+				return {success: response, statusCode: response.status}
 			})
 			.catch((error) => {
 				let err

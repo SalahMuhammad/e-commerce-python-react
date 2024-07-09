@@ -20,7 +20,7 @@ export default function ItemsForm() {
 	const { loading } = useData2(id ? `api/items/${id}/` : null, setData)
 	const itemNameRef = useRef()
     const navigate = useNavigate()
-	const pp = getCookie('pp=') || {}
+	const pp = getCookie('pp') || {}
 
 	const handleOnChange = (e, callback) => {
 		const { name, value } = e.target
@@ -36,14 +36,14 @@ export default function ItemsForm() {
 	const handleSubmit = async () => {
 		setErrors({})
 		
-		const {response, error, statusCode} = await sendRequest(
+		const {error, statusCode} = await sendRequest(
 			method, 
 			`api/items/${data.id ? `${data.id}/` : ''}`, 
 			data, 
 			'الصنف'
 		)
 
-		if (!statusCode) {
+		if ([200, 201, 204].includes(statusCode)) {
 			// success
 			if (method === 'post') {
 				itemNameRef.current.focus()
@@ -54,29 +54,6 @@ export default function ItemsForm() {
 		} else if (statusCode === 400) {
 			setErrors(error);
 		}
-
-
-		const res = await sendRequest(
-			method, 
-			`api/items/${data.id ? `${data.id}/` : ''}`, 
-			data
-		)
-لبيلبيلبيل
-		if (typeof(res.status) == 'number' && (res.status === 200 | res.status === 201 | res.status == 204)) {
-			notify('success', 'تم 👍')
-			if (method == 'post') {
-				itemNameRef.current.focus()
-				setData(initialData)
-			} else {
-				navigate('../')
-			}
-			return
-		}
-
-		if (typeof(res) == 'object') {
-			setErrors(res)
-		}
-
 	}	
 
 	return (

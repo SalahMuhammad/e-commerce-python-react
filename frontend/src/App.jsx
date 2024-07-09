@@ -8,53 +8,61 @@ import Login from './components/login/Login';
 import Items from './components/items/Items';
 
 import ProfitPercent from './components/items/ProfitPercent';
-import Modal from './components/common/Modal';
 import PageNotFound from './components/common/404';
 import ItemsForm from './components/items/ItemsForm';
 import Repositories from './components/repositories/Repositories';
 import RepositoriesForm from './components/repositories/RepositoriesForm';
+import ClientSupplier from './components/client-supplier/Client-supplier';
+import ClientSupplierForm from './components/client-supplier/Client-supplierForm';
 
 
 const router = createBrowserRouter(
 	createRoutesFromElements(
-		<Route
-			element={
-				<>
-					<Header />
-					<Outlet />
-				</>
-			}
-			errorElement={<PageNotFound/>} >
+		<>
 			<Route 
-				path="/"
-				// the matching param might be available to the loader
-				loader={({ params }) => {
-					// console.log(params["lang"]); // get lang param, ? means optional /:lang?/categories
-					return null
-				}}
-				// and the action
-				action={({ params }) => { }}
-				element={<Login />} />
+					path="/"
+					// the matching param might be available to the loader
+					loader={({ params }) => {
+						// console.log(params["lang"]); // get lang param, ? means optional /:lang?/categories
+						return null
+					}}
+					// and the naction
+					action={({ params }) => { }}
+					element={<Login />} />
+			<Route
+				element={
+					<>
+						<Header />
+						<Outlet />
+					</>
+				}
+				errorElement={<PageNotFound/>} >
 
-
-{/* loader={({ params }) => {console.log(params)}} */}
-			{/* </Route> */}
-			{/* <Route path="" element={<Login />} /> */}
-			<Route path="/الاصناف" element={<Items />}>
-				<Route path='ادراج' element={<ItemsForm />} />
-				<Route path='تعديل/:id' element={<ItemsForm />} />
-				<Route path='نسب-الربح' element={<ProfitPercent />} />
+	{/* loader={({ params }) => {console.log(params)}} */}
+				{/* </Route> */}
+				{/* <Route path="" element={<Login />} /> */}
+				<Route path="/الاصناف" element={<Items />}>
+					<Route path='ادراج' element={<ItemsForm />} />
+					<Route path='تعديل/:id' element={<ItemsForm />} />
+					<Route path='نسب-الربح' element={<ProfitPercent />} />
+				</Route>
+				<Route path="/المخازن" element={<Repositories />}>
+					<Route path='ادراج' element={<RepositoriesForm />} />
+					<Route path='تعديل/:id' element={<RepositoriesForm />} />
+				</Route>
+				<Route path='/العملاء' element={<ClientSupplier isClient={true} />}>
+					<Route path='ادراج' element={<ClientSupplierForm isClient={true} />}/>
+					<Route path='تعديل/:id' element={<ClientSupplierForm isClient={true} />}/>
+				</Route>
+				<Route path='/الموردين' element={<ClientSupplier isClient={false} />}>
+					<Route path='ادراج' element={<ClientSupplierForm isClient={false} />}/>
+					<Route path='تعديل/:id' element={<ClientSupplierForm isClient={false} />}/>
+				</Route>
+				<Route path="*" element={<PageNotFound />} />
 			</Route>
-			<Route path="/المخازن" element={<Repositories />}>
-				<Route path='ادراج' element={<RepositoriesForm />} />
-				<Route path='تعديل/:id' element={<RepositoriesForm />} />
-			</Route>
-			<Route path='/s' element={<Modal></Modal>}></Route>
-			<Route path="*" element={<PageNotFound />} />
-		</Route>
+		</>
 	)
 );
-
 
 
 

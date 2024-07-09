@@ -15,7 +15,7 @@ export default function ProfitPercent() {
         price3: '',
         price4: '',
     })
-    const { loading, error } = useData2('api/pp/', setData)
+    const { loading } = useData2('api/pp/', setData)
     const navigate = useNavigate()
 
     function handleChange(e) {
@@ -36,21 +36,16 @@ export default function ProfitPercent() {
 
     const handleSubmit = async () => {
 		
-		const res = await sendRequest('post', `api/pp/`, data)
+		const {error, statusCode} = await sendRequest('post', `api/pp/`, data, 'نسب الربح')
 
-		if (typeof(res.status) == 'number' && (res.status === 200 | res.status === 201 | res.status == 204)) {
-			notify('success', 'تم تحديث نسب الربح بنجاح 👍')
+		if (statusCode === 201) {
             setCookie('pp', JSON.stringify(data), 365)
             navigate('../')
             return
-		}
+		} else if (statusCode === 400) {
+            notify('error', error['detail'] || '')
 
-		if (res['details']) {
-            notify('error', res['details'])
-            return
-		}
-
-        console.log(res)
+        }
 	}	
 
     return (

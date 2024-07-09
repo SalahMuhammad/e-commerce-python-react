@@ -20,6 +20,8 @@ function NavScrollExample() {
 						navbarScroll
 					>
 						<Nav.Link as={Link} to='/الاصناف'>الاصناف</Nav.Link>
+						<Nav.Link as={Link} to='/العملاء'>العملاء</Nav.Link>
+						<Nav.Link as={Link} to='/الموردين'>الموردين</Nav.Link>
 						<Nav.Link as={Link} to='/المخازن'>المخازن</Nav.Link>
 						<NavDropdown title="Link" id="navbarScrollingDropdown">
 							<NavDropdown.Item href="#action3">Action</NavDropdown.Item>

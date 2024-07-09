@@ -406,3 +406,24 @@ i {
 i:hover {
 	opacity: .7;
 }
+
+
+
+#dddddddddddddddddddddddddddd {
+	/* as long as there's enough space in page width it's puts elemnts */
+	display: grid;
+	grid-template-columns: repeat(auto-fill, 200px);
+}
+
+#sssssssssssss {
+	/* screen_width = 500px
+	default = 900px
+	max = 80vw = (screen_width(500) / 100) * max(80) = 400px
+	min = 430px
+	if (default > max)
+		default = max`
+	if (max < min)
+		default = min */
+	/* clamp(min, default, max) */
+	width: clamp(min(430px, 100vw), 900px, 80vw);
+}

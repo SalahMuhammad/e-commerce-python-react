@@ -8,15 +8,16 @@ import { useData2 } from "../custom-hooks/useData";
 import MyGroup from "../common/FormGroup"
 
 
-const initialData = {name:''}
-export default function RepositoriesForm() {
+const initialData = {name:'', detail: ''}
+export default function ClientSupplierForm({ isClient }) {
 	const { id } = useParams()
 	let method = id ? 'put' : 'post'
 	const [data, setData] = useState(initialData)
 	const [errors, setErrors] = useState({})
-	const { loading } = useData2(id ? `api/repositories/${id}/` : null, setData)
+	const { loading } = useData2(id ? `api/${isClient ? 'customers' : 'suppliers'}/${id}/` : null, setData)
 	const nameRef = useRef()
     const navigate = useNavigate()
+	const to = isClient ? 'عميل' : 'مورد'
 
 	const handleOnChange = (e) => {
 		const { name, value } = e.target
@@ -31,9 +32,9 @@ export default function RepositoriesForm() {
 		setErrors({})
 		const {error, statusCode} = await sendRequest(
 			method, 
-			`api/repositories/${data.id ? `${data.id}/` : ''}`, 
+			`api/${isClient ? 'customers' : 'suppliers'}/${data.id ? `${data.id}/` : ''}`, 
 			data, 
-			'المخزن'
+			'ال' + to
 		)
 
 		if ([200, 201, 204].includes(statusCode)) {
@@ -50,26 +51,39 @@ export default function RepositoriesForm() {
 	}	
 
 	return (
-		<MyModal title={id ? `تعديل ${data.name}` : 'اضافه مخزن'} onSubmit={handleSubmit}>
+		<MyModal title={id ? `تعديل ${data.name}` : `اضافه ${to}`} onSubmit={handleSubmit}>
 			<Form onSubmit={(e) => e.preventDefault()}>
 				{(loading && (method != 'post')) && <p style={{color: 'red'}}>جار تحميل البيانات...</p>}
 				
-				<MyGroup label='اسم المخزن' feedback={errors.name || ''}> 
+				<MyGroup label={`اسم ال${to}`} feedback={errors.name || ''}> 
 					<Form.Control
 						ref={nameRef}
 						type="text"
 						name='name'
 						value={data.name}
-						placeholder="اسم المخزن"
+						placeholder={`اسم ال${to}`}
 						onChange={handleOnChange}
 						autoFocus
 						isInvalid={errors.name}
 					/>
 				</MyGroup>
 
+				<MyGroup label='التفاصيل' feedback={errors.detail || ''}> 
+					<Form.Control
+						as="textarea"
+						rows={3}
+						// type="text"
+						name='detail'
+						value={data.detail}
+						placeholder='التفاصيل'
+						onChange={handleOnChange}
+						isInvalid={errors.detail}
+					/>
+				</MyGroup>
+
 				{method !== 'post' && <Button variant='danger' className="mt-3" onClick={() => {
 					method = 'delete';
-					if (handleDelete()) {
+					if (handleDelete(to)) {
 						handleSubmit()
 						navigate('./')
 					} else {	
@@ -81,6 +95,6 @@ export default function RepositoriesForm() {
 	);
 }
 
-const handleDelete = () => {
-	return confirm("هل انت متاكد من انك تريد حذف هذا الصنف !!؟")
+const handleDelete = (to) => {
+	return confirm(`هل انت متاكد من انك تريد حذف هذا ال${to} !!؟`)
 }
