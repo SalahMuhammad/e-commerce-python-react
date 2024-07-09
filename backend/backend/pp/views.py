@@ -25,7 +25,7 @@ class ProfitPercentage(APIView):
                     json.dump(new_data, file)
 
                 message = 'تم تحديث البيانات بنجاح'
-                return Response({'details': message}, status=status.HTTP_201_CREATED)
+                return Response({'detail': message}, status=status.HTTP_201_CREATED)
         except Exception as e:
-            Response({'details': f'{e}'}, status=status.HTTP_400_BAD_REQUEST)
-        return Response({'details': 'قيم غير صالحه...'}, status=status.HTTP_400_BAD_REQUEST)
+            Response({'detail': f'{e}'}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({'detail': 'قيم غير صالحه...'}, status=status.HTTP_400_BAD_REQUEST)

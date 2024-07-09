@@ -43,6 +43,8 @@ INSTALLED_APPS = [
     'items.apps.ItemsConfig',
     'warehouses.apps.WarehousesConfig',
     'users.apps.UsersConfig',
+    'client_supplier.apps.ClientSupplierConfig',
+    'invoices',
     'rest_framework',
     "corsheaders",
 ]

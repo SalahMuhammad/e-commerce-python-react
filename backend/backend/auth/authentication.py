@@ -19,6 +19,10 @@ class CustomAuthentication(BaseAuthentication):
         except User.DoesNotExist:
             raise AuthenticationFailed('User not found.')
         
-        request.data['by'] = user.id
+        if request.method in ['POST', 'PUT', 'PATCH']:
+            # request.data._mutable = True
+            request.data['by'] = user.id
+            # request.data._mutable = False
+            return (user, None)
 
         return (user, None)

@@ -15,6 +15,8 @@ urlpatterns = [
     path('api/items/', include('items.urls')),
     path('api/users/', include('users.urls')),
     path('api/repositories/', include('warehouses.urls')),
+    path('api/', include('client_supplier.urls')),
+    path('api/invoices/', include('invoices.urls')),
     path('api-auth/', include('rest_framework.urls')),
     # re_path(r'^(?:.*)/?$', abc),
     # 
