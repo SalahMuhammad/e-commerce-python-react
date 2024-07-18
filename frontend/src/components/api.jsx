@@ -27,12 +27,14 @@ export function sendRequest(method, url, data, message) {
 				let err
 				switch (error.response.status) {
 					case 400:
-						err = error.response.data;	
+						if (error.response.data.detail)
+							notify('error', error.response.data.detail)
+						err = error.response.data;
 						break
 					default:
 						err = error
 						console.log(error)
-						notify('error', error.response.data['detail'] || error.message)
+						notify('error', error.response.data.detail || error.message)
 						break;
 				}
 				return {error: err, statusCode: error.response.status}

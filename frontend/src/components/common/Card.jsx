@@ -20,7 +20,7 @@ function HeaderAndFooterExample({ obj }) {
 					{obj.images.some((src) => src.includes('http')) && <MyCarousel srcs={obj.images} />}
 				</Card.Title>
 				<Card.Text style={{ color: 'green', fontWeight: 'bold' }}>
-					{obj.name}
+					{obj.name} (<span style={{color: obj.stock < 10 ? 'red' : 'green'}}>{obj.stock}</span>)
 					{/* <div><br /></div> */}
 					<SelectBasicExample values={[obj.price1, obj.price2, obj.price3, obj.price4]} />
 				</Card.Text>

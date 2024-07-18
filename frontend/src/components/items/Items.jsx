@@ -10,7 +10,7 @@ import Dropdown from 'react-bootstrap/Dropdown';
 import { Link } from "react-router-dom";
 
 
-const fields = 'id,by_username,name,price1,price2,price3,price4,updated,created,has_img,images'
+const fields = 'id,by_username,name,price1,price2,price3,price4,updated,created,has_img,images,stock'
 export default function Items() {
 	const [url, setUrl] = useState(`api/items/?fields=${fields}`)
 	const { data, loading } = useData(url)

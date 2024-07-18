@@ -4,7 +4,7 @@ import Form from 'react-bootstrap/Form';
 import { useNavigate, useParams } from "react-router-dom";
 import MyModal from "../common/Modal";
 import Button from 'react-bootstrap/Button';
-import { useData2 } from "../custom-hooks/useData";
+import useData, { useData2 } from "../custom-hooks/useData";
 import { getCookie } from "../utilities";
 import { notify } from "../notification";
 import MyGroup from "../common/FormGroup"
@@ -20,7 +20,7 @@ export default function ItemsForm() {
 	const { loading } = useData2(id ? `api/items/${id}/` : null, setData)
 	const itemNameRef = useRef()
     const navigate = useNavigate()
-	const pp = getCookie('pp') || {}
+	const pp = useData('api/pp/')
 
 	const handleOnChange = (e, callback) => {
 		const { name, value } = e.target
@@ -85,9 +85,9 @@ export default function ItemsForm() {
 								const value = Number(e.target.value)
 								setData((prev) => ({
 									...prev,
-									price2: value + value * pp.price2,
-									price3: value + value * pp.price3,
-									price4: value + value * pp.price4,
+									price2: value + value * pp.data.price2,
+									price3: value + value * pp.data.price3,
+									price4: value + value * pp.data.price4,
 								}))
 							}
 						})}
