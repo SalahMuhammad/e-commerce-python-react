@@ -7,7 +7,7 @@ class JWTUtilities:
   def generate_jwt(user_id):
     payload = {
         'id': user_id,
-        'exp': datetime.datetime.utcnow() + datetime.timedelta(days=7),
+        'exp': datetime.datetime.utcnow() + datetime.timedelta(days=1),
         'iat': datetime.datetime.utcnow()
       }
     

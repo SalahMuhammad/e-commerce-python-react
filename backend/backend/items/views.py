@@ -12,6 +12,11 @@ from rest_framework.response import Response
 from rest_framework import status
 # 
 from django.db import IntegrityError
+# 
+from django.db.models.deletion import ProtectedError
+from django.db import transaction
+# 
+from .models import Images
 
 
 class ItemsList(mixins.ListModelMixin, 
@@ -50,10 +55,7 @@ class ItemsList(mixins.ListModelMixin,
 		try:
 			return self.create(request, *args, **kwargs)
 		except IntegrityError as e:
-			print(e)
-			# An item with this name already exists
-			error_message = "هذا الحقل مطلوب..."
-			return Response({"name": error_message}, status=status.HTTP_400_BAD_REQUEST)
+			return Response({'name': 'هذا الصنف موجود بالفعل...'}, status=status.HTTP_400_BAD_REQUEST)
 
 class ItemDetail(mixins.RetrieveModelMixin, 
                  mixins.UpdateModelMixin,
@@ -72,11 +74,20 @@ class ItemDetail(mixins.RetrieveModelMixin,
 		return self.retrieve(request, *args, **kwargs)
 
 	def put(self, request,*args, **kwargs):
-		return super().update(request, *args, **kwargs)
+		return super().partial_update(request, *args, **kwargs)
   
 	def delete(self, request, *args, **kwargs):
-		for image in self.get_object().images.all():
-			image.img.delete()
-			image.delete()
-		return super().destroy(request, *args, **kwargs)
+		try:
+			images = list(Images.objects.filter(imagess__id=kwargs['pk']))
+			with transaction.atomic():
+				res = super().destroy(request, *args, **kwargs)
+
+				if res.status_code == 204:
+					for image in images:
+						image.img.delete()
+						image.delete()
+
+		except ProtectedError as e:
+			return Response({'detail': 'لا يمكن حذف هذا العنصر قبل حذف المعاملات المرتبطه به اولا 😵...'}, status=status.HTTP_400_BAD_REQUEST)
+		return Response(status=status.HTTP_204_NO_CONTENT)
   

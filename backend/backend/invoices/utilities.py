@@ -7,8 +7,8 @@ def get_invoice_type(self):
 	full_url = self.request.build_absolute_uri()
 	return PurchaseInvoice if full_url.__contains__('purchase') else SalesInvoice
 
-def update_items_prices(invoice_type, items_list, status_code):
-	if invoice_type == PurchaseInvoice and status_code in (200, 201):
+def update_items_prices(items_list, status_code):
+	if status_code in (200, 201):
 		try:
 			with open('pp/profitPercentage.json') as profit_percentage:
 				pp = json.load(profit_percentage)
@@ -23,3 +23,21 @@ def update_items_prices(invoice_type, items_list, status_code):
 					item.save()
 		except Exception as e:
 			print(f'an error occurred while updating items prices: {e}')
+
+def compare_items(instance_items, validated_items):
+    """
+        return list consists of item ids
+    """
+    
+    instance_items_set = set(
+        (item.item.id) for item in instance_items) # , item.quantity
+    
+    validated_items_set = set(
+        (validated_item['item'].id) for validated_item in validated_items) # , validated_item.get('quantity', 1)
+
+    # Items to remove and add
+    items_to_remove = instance_items_set - validated_items_set
+    items_to_add = validated_items_set - instance_items_set
+    # print(items_to_remove)
+    # print(items_to_add)
+    return items_to_remove, items_to_add

@@ -1,5 +1,6 @@
+from django.db import transaction
 from rest_framework import serializers
-from items.models import Items, Images
+from items.models import Items, Images, Stock
 
 
 class Base64ImageField(serializers.ImageField):
@@ -47,33 +48,34 @@ class Base64ImageField(serializers.ImageField):
 		extension = imghdr.what(file_name, decoded_file)
 		extension = "jpg" if extension == "jpeg" else extension
 		return extension
-
-
-class ImagesSerializer(serializers.ModelSerializer):
-	img = Base64ImageField(
-		required=False,
-		max_length=10000, 
-		use_url=True,
-	)
-
 	
+
+class StockSerializer(serializers.ModelSerializer):
 	class Meta:
-		model = Images
-		fields = ['img']
+		model = Stock
+		fields = '__all__'
+
+
+class ImageURLField(serializers.RelatedField):
+    def to_representation(self, value):
+        request = self.context.get('request', None)
+        if request:
+            return request.build_absolute_uri(value.img.url)
+        # return f'{settings.MEDIA_URL}{value.img}'
 
 
 class ItemsSerializer(serializers.ModelSerializer):
 	by_username = serializers.SerializerMethodField()
 	has_img = serializers.SerializerMethodField()
-	# images = ImagesSerializer(many=True, read_only=True)
-	images = serializers.SerializerMethodField()
 	images_upload = serializers.ListField(
 			required=False,
 			child=Base64ImageField(),
 			write_only=True,
 		)
+	images = ImageURLField(many=True, read_only=True)
+	stock = serializers.SerializerMethodField()
 
-	
+
 	class Meta:
 		model = Items
 		fields = '__all__'
@@ -90,32 +92,34 @@ class ItemsSerializer(serializers.ModelSerializer):
 
 	def create(self, validated_data):
 		images_data = validated_data.pop('images_upload', [])
-		item = super().create(validated_data)
-		self.update_images(item, images_data)
+
+		with transaction.atomic():
+			item = super().create(validated_data)
+
+			for img in images_data:
+				item.images.create(img=img)
 		return item
 	
 	def update(self, instance, validated_data):
-		images_data = validated_data.pop('images_upload', [])
-		item = super().update(instance, validated_data)
-		self.update_images(item, images_data)
+		images_data = validated_data.pop('images_upload', None)
+
+		with transaction.atomic():
+			item = super().update(instance, validated_data)
+			
+			if images_data == []:
+				for img in instance.images.all():
+					img.img.delete()
+					img.delete()
+
+				for img in images_data:
+					item.images.create(img=img)
 		return item
+
+	def get_stock(self, obj):
+		return [f'{i.repository}: {i.quantity}, ' for i in obj.stock.all()]
 
 	def get_by_username(self, obj):
 		return obj.by.username
 	
 	def get_has_img(self, obj):
 		return obj.images.exists()
-
-	def get_images(self, obj):
-		return [f'http://localhost:8000{image.img.url}' for image in obj.images.all()]
-
-	def update_images(self, instance, images_data):
-		if images_data:
-			for image in instance.images.all():
-				image.img.delete()  # Deletes the file from the filesystem
-				image.delete()  # Deletes the record from the database
-
-			for image_data in images_data:
-				instance.images.create(item=instance, img=image_data)
-
-  

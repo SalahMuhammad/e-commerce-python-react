@@ -13,4 +13,4 @@ class Repositories(models.Model):
 
 
     class Meta:
-        ordering = ['-updated']
+        ordering = ['name']
