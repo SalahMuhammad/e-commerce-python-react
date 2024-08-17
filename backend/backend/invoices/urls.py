@@ -1,11 +1,9 @@
 from django.urls import path, include
-from .views import InvoiceItemsView, SalesInvoicesView, PurchaseInvoicesView, SalesInvoiceDetailView, PurchaseInvoiceDetailView
+from .views import InvoicesListView, ListCreateView, DetailView
 
 
 urlpatterns = [
-    path('purchase/', PurchaseInvoicesView.as_view()),
-    path('purchase/<int:pk>/', PurchaseInvoiceDetailView.as_view()),
-    path('sales/', SalesInvoicesView.as_view()),
-    path('sales/<int:pk>/', SalesInvoiceDetailView.as_view()),
-    path('items/<int:pk>/', InvoiceItemsView.as_view()),
+    # path('', InvoicesListView.as_view()),
+    path('', ListCreateView.as_view()),
+    path('<int:pk>/', DetailView.as_view()),
 ]

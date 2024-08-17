@@ -34,10 +34,13 @@ export default function useData(url) {
             }
         };
 
+        // const timeoutId = setTimeout(() => {
         fetchData();
+        // }, 200)
 
         return () => {
             isMounted = false;
+            // clearTimeout(timeoutId)
         };
     }, [url]);
   

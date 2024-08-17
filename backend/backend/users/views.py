@@ -45,7 +45,7 @@ class LoginView(APIView):
     if not user.check_password(password):
       raise AuthenticationFailed({'password': 'Incorrect password!'})#, code=status.HTTP_400_BAD_REQUEST)
     
-    token = JWTUtilities.generate_jwt(user_id=user.id)
+    token = JWTUtilities.generate_jwt(user=user)
 
     response = Response()
     # response.set_cookie(key='jwt', value=token, expires=datetime.datetime.utcnow() + datetime.timedelta(days=7))

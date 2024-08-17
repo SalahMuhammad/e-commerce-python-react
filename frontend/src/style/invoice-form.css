@@ -1,0 +1,97 @@
+.invoice-form .controls > button {
+    margin-left: 1.5rem;
+}
+
+.invoice-form .form {
+    box-shadow: .5rem .5rem 1rem rgba(0 0 0 / .2);
+}
+
+.invoice-form .form .detail {
+        display: flex;
+        gap: .5rem;
+}
+
+.invoice-form .form .items {
+    display: flex;
+    gap: .5rem;
+}
+
+@media screen and (max-width: 780px) {
+    .invoice-form .form .detail,
+    .invoice-form .form .items {
+        flex-direction: column;
+    }
+}
+
+.invoice-form .my-table {
+    margin-top: 1rem;
+    box-shadow: .5rem .5rem 1rem rgba(0 0 0 / .2);
+}
+
+.slider {
+    width: 100%;
+    display: flex;
+    /* background-color: red; */
+    overflow-x: scroll;
+    scroll-behavior: smooth;
+    /* white-space: nowrap; */
+    width: 100%; /* or any specific width */
+    padding: 0 .5rem;
+    box-shadow: .5rem .5rem 1rem rgba(0 0 0 / .1);
+}
+
+.slider::-webkit-scrollbar {
+    display: none;
+}
+
+.slider > div {
+    width: 100%;
+    padding: 10px;
+    flex: none;
+    /* background-color: blue; */
+}
+
+.invoices-navs {
+    display: flex;
+    gap: .5rem;
+}
+
+.invoices-navs img {
+    width: 2rem;
+    cursor: pointer;
+    margin: 0 1rem;    
+}
+
+
+/* General pseudo-element styles for the mark */
+.p-inv::before,
+.s-inv::before {
+    content: '';
+    display: inline-block;
+    width: 8px;  /* Adjust width as needed */
+    height: 8px; /* Adjust height as needed */
+    border-radius: 50%; /* Makes it a circle */
+
+}
+
+/* Specific color for p-inv */
+.p-inv::before {
+    background-color: green;
+}
+
+/* Specific color for s-inv */
+.s-inv::before {
+    background-color: red;
+}
+
+.inv-items {
+    display: none;
+}
+
+.inv-items.active {
+    display: table-row;
+}
+
+/* .invoice-form .detail > div {
+    width: 10px;
+} */

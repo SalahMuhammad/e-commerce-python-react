@@ -14,7 +14,7 @@ export default function ClientSupplierForm({ isClient }) {
 	let method = id ? 'put' : 'post'
 	const [data, setData] = useState(initialData)
 	const [errors, setErrors] = useState({})
-	const { loading } = useData2(id ? `api/${isClient ? 'customers' : 'suppliers'}/${id}/` : null, setData)
+	const { loading } = useData2(id ? `api/owners/${id}/` : null, setData)
 	const nameRef = useRef()
     const navigate = useNavigate()
 	const to = isClient ? 'عميل' : 'مورد'
@@ -32,7 +32,7 @@ export default function ClientSupplierForm({ isClient }) {
 		setErrors({})
 		const {error, statusCode} = await sendRequest(
 			method, 
-			`api/${isClient ? 'customers' : 'suppliers'}/${data.id ? `${data.id}/` : ''}`, 
+			`api/owners/${data.id ? `${data.id}/` : ''}`, 
 			data, 
 			'ال' + to
 		)

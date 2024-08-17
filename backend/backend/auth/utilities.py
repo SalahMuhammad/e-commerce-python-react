@@ -4,11 +4,11 @@ import jwt, datetime
 
 class JWTUtilities:
   @staticmethod
-  def generate_jwt(user_id):
+  def generate_jwt(user):
     payload = {
-        'id': user_id,
-        'exp': datetime.datetime.utcnow() + datetime.timedelta(days=1),
-        'iat': datetime.datetime.utcnow()
+        'id': user.id,
+        'exp': datetime.datetime.now() + datetime.timedelta(days=1),
+        'iat': datetime.datetime.now()
       }
     
     return jwt.encode(payload, settings.JWT_SECRET_KEY, algorithm='HS256')

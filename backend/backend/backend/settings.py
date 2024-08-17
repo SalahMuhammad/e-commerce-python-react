@@ -27,7 +27,21 @@ SECRET_KEY = 'django-insecure-yky45*rz(_#(lrg&ul5askffrikqb5z#n-n-$5sxyci)!n*c1%
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['192.168.1.10:8000','*']
+ALLOWED_HOSTS = ['192.168.1.10:8000', '*']
+
+CORS_ALLOW_HEADERS = [
+    "accept",
+    "accept-encoding",
+    "authorization",
+    "content-type",
+    "dnt",
+    "origin",
+    "user-agent",
+    "x-csrftoken",
+    "x-requested-with",
+    # "x_auth",  # Add your custom header here
+    "auth",
+]
 
 
 # Application definition
@@ -41,12 +55,15 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     # myInput
     'items.apps.ItemsConfig',
-    'warehouses.apps.WarehousesConfig',
+    'repositories.apps.RepositoriesConfig',
     'users.apps.UsersConfig',
-    'client_supplier.apps.ClientSupplierConfig',
+    'owners.apps.OwnersConfig',
+    'transfer_items',
     'invoices',
     'rest_framework',
     "corsheaders",
+
+    # "django_extensions",
 ]
 
 MIDDLEWARE = [
@@ -195,3 +212,27 @@ APPEND_SLASH = False
 #     'multipart/form-data',
 #     # Add any other content types you want to allow
 # ]
+
+
+# my input
+# LOGGING = {
+#     'version': 1,
+#     'filters': {
+#         'require_debug_true': {
+#             '()': 'django.utils.log.RequireDebugTrue',
+#         }
+#     },
+#     'handlers': {
+#         'console': {
+#             'level': 'DEBUG',
+#             'filters': ['require_debug_true'],
+#             'class': 'logging.StreamHandler',
+#         }
+#     },
+#     'loggers': {
+#         'django.db.backends': {
+#             'level': 'DEBUG',
+#             'handlers': ['console'],
+#         }
+#     }
+# }

@@ -14,6 +14,7 @@ import Repositories from './components/repositories/Repositories';
 import RepositoriesForm from './components/repositories/RepositoriesForm';
 import ClientSupplier from './components/client-supplier/Client-supplier';
 import ClientSupplierForm from './components/client-supplier/Client-supplierForm';
+import Invoices from './components/invoices/Invoices';
 
 
 const router = createBrowserRouter(
@@ -50,13 +51,13 @@ const router = createBrowserRouter(
 					<Route path='ادراج' element={<RepositoriesForm />} />
 					<Route path='تعديل/:id' element={<RepositoriesForm />} />
 				</Route>
-				<Route path='/العملاء' element={<ClientSupplier isClient={true} />}>
+				<Route path='/العملاء-الموردين' element={<ClientSupplier isClient={true} />}>
 					<Route path='ادراج' element={<ClientSupplierForm isClient={true} />}/>
 					<Route path='تعديل/:id' element={<ClientSupplierForm isClient={true} />}/>
 				</Route>
-				<Route path='/الموردين' element={<ClientSupplier isClient={false} />}>
-					<Route path='ادراج' element={<ClientSupplierForm isClient={false} />}/>
-					<Route path='تعديل/:id' element={<ClientSupplierForm isClient={false} />}/>
+				<Route path='/الفواتير' element={<Invoices />}>
+					{/* <Route path='ادراج' element={<ClientSupplierForm />}/> */}
+					{/* <Route path='تعديل/:type/:id' element={<InvoiceForm />}/> */}
 				</Route>
 				<Route path="*" element={<PageNotFound />} />
 			</Route>

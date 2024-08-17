@@ -1,6 +1,17 @@
 import axiosInstance from "./axiosInstance";
 import { notify } from "./notification";
 
+
+export function getData(url, method='get', data={}, conf={}) {
+	return axiosInstance[method](url, data, conf)
+			.then((response) => {
+				return response
+			})
+			.catch((error) => {
+				notify('error', `${error.response.data.detail || error}`)
+			})
+}
+
 export async function fetchData(endPoint, options) {
 	return await fetch(`http://127.0.0.1:8000/${endPoint}`, options);
 }

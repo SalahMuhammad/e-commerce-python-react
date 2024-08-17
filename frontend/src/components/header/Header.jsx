@@ -11,7 +11,7 @@ function NavScrollExample() {
 	return (
 		<Navbar expand="lg" className="bg-body-tertiary">
 			<Container fluid>
-				<Navbar.Brand as={Link} to='/'>!!؟</Navbar.Brand>
+				<Navbar.Brand as={Link} to='/'>&gt;\_&lt;</Navbar.Brand>
 				<Navbar.Toggle aria-controls="navbarScroll" />
 				<Navbar.Collapse id="navbarScroll">
 					<Nav
@@ -20,10 +20,10 @@ function NavScrollExample() {
 						navbarScroll
 					>
 						<Nav.Link as={Link} to='/الاصناف'>الاصناف</Nav.Link>
-						<Nav.Link as={Link} to='/العملاء'>العملاء</Nav.Link>
-						<Nav.Link as={Link} to='/الموردين'>الموردين</Nav.Link>
+						<Nav.Link as={Link} to='/الفواتير'>الفواتير</Nav.Link>
+						<Nav.Link as={Link} to='/العملاء-الموردين'>العملاء/الموردين</Nav.Link>
 						<Nav.Link as={Link} to='/المخازن'>المخازن</Nav.Link>
-						<NavDropdown title="Link" id="navbarScrollingDropdown">
+						{/* <NavDropdown title="Link" id="navbarScrollingDropdown">
 							<NavDropdown.Item href="#action3">Action</NavDropdown.Item>
 							<NavDropdown.Item href="#action4">
 								Another action
@@ -32,12 +32,12 @@ function NavScrollExample() {
 							<NavDropdown.Item href="#action5">
 								Something else here
 							</NavDropdown.Item>
-						</NavDropdown>
-						<Nav.Link href="#" disabled>
+						</NavDropdown> */}
+						{/* <Nav.Link href="#" disabled>
 							Link
-						</Nav.Link>
+						</Nav.Link> */}
 					</Nav>
-					<Form className="d-flex">
+					{/* <Form className="d-flex">
 						<Form.Control
 							type="search"
 							placeholder="Search"
@@ -45,7 +45,7 @@ function NavScrollExample() {
 							aria-label="Search"
 						/>
 						<Button variant="outline-success">Search</Button>
-					</Form>
+					</Form> */}
 				</Navbar.Collapse>
 			</Container>
 		</Navbar>

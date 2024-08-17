@@ -1,6 +1,6 @@
 from django.db import transaction
 from rest_framework import serializers
-from items.models import Items, Images, Stock
+from items.models import Items, Stock, Barcode
 
 
 class Base64ImageField(serializers.ImageField):
@@ -51,9 +51,19 @@ class Base64ImageField(serializers.ImageField):
 	
 
 class StockSerializer(serializers.ModelSerializer):
+	repository_name = serializers.ReadOnlyField(source='repository.name')
+
+
 	class Meta:
 		model = Stock
 		fields = '__all__'
+
+
+class BarcodeSerializer(serializers.ModelSerializer):
+	class Meta:
+		model = Barcode
+		fields = ['id', 'barcode']
+
 
 
 class ImageURLField(serializers.RelatedField):
@@ -65,15 +75,16 @@ class ImageURLField(serializers.RelatedField):
 
 
 class ItemsSerializer(serializers.ModelSerializer):
-	by_username = serializers.SerializerMethodField()
-	has_img = serializers.SerializerMethodField()
+	by_username = serializers.ReadOnlyField(source='by.username')
+	# has_img = serializers.SerializerMethodField()
 	images_upload = serializers.ListField(
 			required=False,
 			child=Base64ImageField(),
 			write_only=True,
 		)
 	images = ImageURLField(many=True, read_only=True)
-	stock = serializers.SerializerMethodField()
+	stock = StockSerializer(many=True, read_only=True)
+	barcodes = BarcodeSerializer(many=True, required=False)
 
 
 	class Meta:
@@ -82,44 +93,56 @@ class ItemsSerializer(serializers.ModelSerializer):
 
 
 	def __init__(self, *args, **kwargs):
-		fieldss = kwargs.pop('fields', None)
+		fieldss = kwargs.pop('fieldss', None)
 		super(ItemsSerializer, self).__init__(*args, **kwargs)
-		if fieldss is not None:
-			allowed = set(fieldss)
+		if fieldss:
+			allowed = set(fieldss.split(','))
 			existing = set(self.fields.keys())
 			for field_name in existing - allowed:
 				self.fields.pop(field_name)
 
 	def create(self, validated_data):
 		images_data = validated_data.pop('images_upload', [])
+		barcodes_data = validated_data.pop('barcodes', None)
 
 		with transaction.atomic():
 			item = super().create(validated_data)
 
-			for img in images_data:
+			if barcodes_data:
+				for barcode in barcodes_data:
+					item.barcodes.create(barcode=barcode['barcode'])
+
+			for img in images_data:	
 				item.images.create(img=img)
 		return item
 	
 	def update(self, instance, validated_data):
 		images_data = validated_data.pop('images_upload', None)
+		barcodes_data = validated_data.pop('barcodes', None)
 
 		with transaction.atomic():
 			item = super().update(instance, validated_data)
 			
-			if images_data == []:
+			if images_data != None:
 				for img in instance.images.all():
 					img.img.delete()
 					img.delete()
 
 				for img in images_data:
 					item.images.create(img=img)
+
+			if barcodes_data:
+				# ids = [i.get('id', -1) for i in barcodes_data]
+				item.barcodes.all().delete()
+				for b2 in barcodes_data:
+					item.barcodes.create(barcode=b2['barcode'])
 		return item
 
-	def get_stock(self, obj):
-		return [f'{i.repository}: {i.quantity}, ' for i in obj.stock.all()]
+	# def get_stock(self, obj):
+	# 	return [f'{i.repository}: {i.quantity}, ' for i in obj.stock.all()]
 
-	def get_by_username(self, obj):
-		return obj.by.username
+	# def get_by_username(self, obj):
+	# 	return obj.by.username
 	
-	def get_has_img(self, obj):
-		return obj.images.exists()
+	# def get_has_img(self, obj):
+	# 	return obj.images.exists()

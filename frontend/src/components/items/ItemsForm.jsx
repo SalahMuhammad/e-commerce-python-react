@@ -10,7 +10,7 @@ import { notify } from "../notification";
 import MyGroup from "../common/FormGroup"
 
 
-const initialData = {name:'', price1: '', price2: '', price3: '', price4: ''}
+const initialData = {name:'', price1: '', price2: '', price3: '', price4: '', barcodes: []}
 export default function ItemsForm() {
 	const { id } = useParams()
 	let method = id ? 'put' : 'post'
@@ -23,6 +23,7 @@ export default function ItemsForm() {
 	const pp = useData('api/pp/')
 
 	const handleOnChange = (e, callback) => {
+		console.log(data)
 		const { name, value } = e.target
 	
 		setData((prev) => ({
@@ -35,7 +36,7 @@ export default function ItemsForm() {
 
 	const handleSubmit = async () => {
 		setErrors({})
-		
+
 		const {error, statusCode} = await sendRequest(
 			method, 
 			`api/items/${data.id ? `${data.id}/` : ''}`, 
@@ -55,6 +56,24 @@ export default function ItemsForm() {
 			setErrors(error);
 		}
 	}	
+
+	const handleOnAddBracodeClick = (e) => {
+		e.preventDefault()
+		setData((prev) => ({
+			...prev,
+			barcodes: [...prev.barcodes, {'barcode': ''}]
+		}))
+	}
+
+	const handleBarcodeChange = (e, i) => {
+		setData((prev) => {
+			prev.barcodes[i].barcode = e.target.value
+			return {
+				...prev,
+				barcodes: [...prev.barcodes]
+			}
+		})
+	}
 
 	return (
 		<MyModal title={id ? `تعديل ${data.name}` : "اضافه صنف"} onSubmit={handleSubmit}>
@@ -105,7 +124,7 @@ export default function ItemsForm() {
 						}} checked={autoCalculatePrices} />
 				</div>
 
-				<MyGroup label='خاص' feedback={errors.price2 || ''}>
+				<MyGroup label='خاص' feedback={errors.price2 || ''} isHidden={autoCalculatePrices ? true : false}>
 					<Form.Control
 						{...numberFieldAttr}
 						name='price2'
@@ -118,7 +137,7 @@ export default function ItemsForm() {
 					/>
 				</MyGroup>
 
-				<MyGroup label='جمله' feedback={errors.price3 || ''}>
+				<MyGroup label='جمله' feedback={errors.price3 || ''} isHidden={autoCalculatePrices ? true : false}>
 					<Form.Control
 						{...numberFieldAttr}
 						name='price3'
@@ -131,7 +150,7 @@ export default function ItemsForm() {
 					/>
 				</MyGroup>
 
-				<MyGroup label='قطاعى' feedback={errors.price4 || ''}>
+				<MyGroup label='قطاعى' feedback={errors.price4 || ''} isHidden={autoCalculatePrices ? true : false}>
 					<Form.Control
 						{...numberFieldAttr}
 						name='price4'
@@ -144,13 +163,32 @@ export default function ItemsForm() {
 					/>
 				</MyGroup>
 
+				<hr />
+				<button className="no-style" onClick={handleOnAddBracodeClick}>
+					<i className="fa-solid fa-plus" ></i>
+				</button>
+				{data.barcodes && data.barcodes.map((barcode, index) => (
+					<MyGroup key={barcode.id||index} feedback={errors.barcodes?.[index] ? errors.barcodes[index].barcode : ''}>{/*errors.barcodes[index] ||errors.barcodes[index]*/}
+						<Form.Control
+							value={barcode.barcode}
+							placeholder="باركود"
+							onChange={(e) => handleBarcodeChange(e, index)}
+							isInvalid={errors.barcodes?.[index] ? true : false}
+							required
+						/>
+					</MyGroup>
+				))}
+
 				<MyGroup label='الصور' feedback=''>
 					<input 
 						style={{borderColor: errors.images_upload ? 'red' : 'inhrit'}}
 						className="form-control" 
 						type="file"
+						onClick={() => setData((prev) => ({
+							...prev,
+							images_upload: []
+						}))}
 						onChange={(e) => {
-							
 							const files = e.target.files
 							
 							const readFile = (file) => {
