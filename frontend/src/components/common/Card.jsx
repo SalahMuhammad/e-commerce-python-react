@@ -15,9 +15,9 @@ function MyCard({ item }) {
 	return (
 		<div>
 			<Stocks show={show} setShow={setShow} data={item} />
-			<Card className="text-center my-card">
+			<Card style={{boxShadow: '0px 4px 3px rgba(0 0 0 / .2'}} className="text-center my-card">
 				<Card.Header>
-					Featured
+					{/* Featured */}
 				</Card.Header>
 				<Card.Body>
 					<Card.Title>

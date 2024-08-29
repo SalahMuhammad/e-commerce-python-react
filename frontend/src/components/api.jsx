@@ -26,6 +26,9 @@ export function sendRequest(method, url, data, message) {
 					case 'put':
 						notify('success', `تم تعديل بيانات ${message} بنجاح... 👍`)
 						break
+					case 'patch':
+						notify('success', `تم تعديل بيانات ${message} بنجاح... 👍`)
+						break
 					case 'delete':
 						notify('success', `تم حذف ${message} بنجاح... 👍`)
 						break

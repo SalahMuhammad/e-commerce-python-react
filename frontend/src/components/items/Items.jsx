@@ -13,6 +13,7 @@ import SearchInput from "../common/SearchInput.jsx";
 
 let fields = 'id,name,price1,price2,price3,price4,has_img,images,stock,'
 export default function Items() {
+	document.title = 'الاصناف'
 	const [url, setUrl] = useState(`api/items/?fields=${fields}`)
 	const { data, loading } = useData(url)
 	useScroll(loading, data.next, setUrl)

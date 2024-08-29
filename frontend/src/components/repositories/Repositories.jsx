@@ -10,6 +10,7 @@ import Tooltip from "../common/Tooltip.jsx";
 
 
 export default function Warehouses() {
+	document.title = 'المخازن'
 	const [url, setUrl] = useState(`api/repositories/`)
 	const { data, loading } = useData(url)
 	useScroll(loading, data.next, setUrl)
