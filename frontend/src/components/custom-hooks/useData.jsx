@@ -67,7 +67,7 @@ export function useData2(url, setData) {
                 }
             } catch (error) {
                 setError(error);
-                notify('error', error.message)
+                notify('error', error.response.data['detail'] || error.message)
             } finally {
                 setLoading(false)
             }

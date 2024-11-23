@@ -6,6 +6,7 @@ import MyModal from "../common/Modal";
 import Button from 'react-bootstrap/Button';
 import { useData2 } from "../custom-hooks/useData";
 import MyGroup from "../common/FormGroup"
+import { useAltShortcut } from "../custom-hooks/useShorcut";
 
 
 const initialData = {name:'', detail: ''}
@@ -43,15 +44,15 @@ export default function ClientSupplierForm({ isClient }) {
 				nameRef.current.focus()
 				setData(initialData)
 			} else {
-				navigate('../')
+				navigate('/clients-suppliers')
 			}
 		} else if (statusCode === 400) {
 			setErrors(error);
 		}
 	}	
+	useAltShortcut(handleSubmit, 13)
 
 	return (
-		<MyModal title={id ? `تعديل ${data.name}` : `اضافه ${to}`} onSubmit={handleSubmit}>
 			<Form onSubmit={(e) => e.preventDefault()}>
 				{(loading && (method != 'post')) && <p style={{color: 'red'}}>جار تحميل البيانات...</p>}
 				
@@ -90,8 +91,24 @@ export default function ClientSupplierForm({ isClient }) {
 						method = 'put'
 					}}}>حذف</Button>
 				}
+				<hr />
+				<Button variant="secondary" onClick={() => navigate(-1)}>
+					الغاء
+				</Button>
+				<Button variant="primary" onClick={handleSubmit}>
+					{/* {disabled && (
+						<Spinner
+							as="span"
+							animation="border"
+							size="sm"
+							role="status"
+							aria-hidden="true"
+						/>
+					)}{" "} */}
+					<span>{true ? "حفظ" : "جار التحميل..."}</span>
+				</Button>
 			</Form>
-		</MyModal>
+			
 	);
 }
 

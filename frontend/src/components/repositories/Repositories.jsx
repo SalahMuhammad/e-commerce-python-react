@@ -24,12 +24,8 @@ export default function Warehouses() {
 	return (
 		<>
 			<Outlet />
-
 			<div className="container">
-                <div className="top">	
-                    <Link className="btn btn-success" to={'ادراج'} >
-                        اضافه
-                    </Link>
+							<div className="top">	
 					{/* <input className="form-control" type="text" placeholder="بحث" onChange={handleSearchInputOnChange} /> */}
 				</div>
 				<Table theadList={['#', 'الاسم']} caption={`المخازن ${data.count}/${data.results.length}`}>
@@ -37,14 +33,14 @@ export default function Warehouses() {
 						{data.results && data.results.map((obj) => (
 							<tr key={obj.id}>
 								<th>
-									<Link to={`تعديل/${obj.id}`}><i className="fa-solid fa-pen-to-square"></i></Link>
+									<Link to={`edit/${obj.id}`}><i className="fa-solid fa-pen-to-square"></i></Link>
 									<Tooltip endpoint={`repositories/${obj.id}`} />
 								</th>
 								<td>{obj.name}</td>
 							</tr>
 						))}
 					</tbody>
-                </Table>
+				</Table>
 			</div>
 		</>
 	)

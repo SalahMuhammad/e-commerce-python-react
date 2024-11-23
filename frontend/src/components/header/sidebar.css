@@ -1,0 +1,131 @@
+/* src/components/Sidebar/Sidebar.css */
+.sidebar {
+  position: fixed;
+  right: 0;
+  top: 0;
+  height: 100vh;
+  width: 250px;
+  background: #8771ff;
+  /* background: #1a1a1a; */
+  color: white;
+  transition: all 0.3s ease;
+  z-index: 1000;
+  overflow-y: auto;
+  box-shadow: .5rem .5rem 1rem rgba(0 0 0 / .2);
+}
+
+.sidebar-header {
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #333;
+}
+
+.logo {
+  height: 40px;
+  width: auto;
+}
+
+.toggle-btn {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1.2rem;
+  cursor: pointer;
+}
+
+.nav-item-container {
+  border-bottom: 1px solid #333;
+}
+
+.sidebar-link {
+  padding: 15px 20px;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.sidebar-link:hover {
+  background: #333;
+}
+
+.link-content {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.menu-icon {
+  width: 20px;
+}
+
+.dropdown-icon {
+  font-size: 0.8rem;
+  transition: transform 0.2s ease;
+}
+
+.dropdown-item {
+  padding: 12px 20px 12px 55px !important;
+  color: #ddd !important;
+  background: #222;
+  transition: all 0.2s ease;
+  font-size: 0.9rem;
+}
+
+.dropdown-item:hover {
+  background: #333 !important;
+  color: #fff !important;
+}
+
+.sidebar-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+  .sidebar {
+    transform: translateX(-100%);
+  }
+  
+  .sidebar.open {
+    transform: translateX(0);
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  .sidebar {
+    width: 70px;
+  }
+  
+  .sidebar .link-text,
+  .sidebar .dropdown-icon {
+    display: none;
+  }
+  
+  .sidebar:hover {
+    width: 250px;
+  }
+  
+  .sidebar:hover .link-text,
+  .sidebar:hover .dropdown-icon {
+    display: inline-block;
+  }
+  
+  .sidebar .dropdown-item {
+    display: none;
+  }
+  
+  .sidebar:hover .dropdown-item {
+    display: block;
+  }
+}

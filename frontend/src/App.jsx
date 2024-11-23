@@ -14,13 +14,17 @@ import Repositories from './components/repositories/Repositories';
 import RepositoriesForm from './components/repositories/RepositoriesForm';
 import ClientSupplier from './components/client-supplier/Client-supplier';
 import ClientSupplierForm from './components/client-supplier/Client-supplierForm';
-import Invoices from './components/invoices/Invoices';
+import InvoicesToggle from './components/invoices/Toggle';
+import InvoiceForm from './components/invoices/InvoicesForm';
+import InvoicesList from './components/invoices/InvoicesList';
+import InvoiceItems from './components/invoices/InvoiceItems';
+import Sidebar from './components/header/Header2';
 
 
 const router = createBrowserRouter(
 	createRoutesFromElements(
 		<>
-			<Route 
+			<Route
 					path="/"
 					// the matching param might be available to the loader
 					loader={({ params }) => {
@@ -33,8 +37,10 @@ const router = createBrowserRouter(
 			<Route
 				element={
 					<>
-						<Header />
-						<Outlet />
+						<Sidebar />
+						<div className="custome-container">
+							<Outlet />
+						</div>
 					</>
 				}
 				errorElement={<PageNotFound/>} >
@@ -42,23 +48,25 @@ const router = createBrowserRouter(
 	{/* loader={({ params }) => {console.log(params)}} */}
 				{/* </Route> */}
 				{/* <Route path="" element={<Login />} /> */}
-				<Route path="/الاصناف" element={<Items />}>
-					<Route path='ادراج' element={<ItemsForm />} />
-					<Route path='تعديل/:id' element={<ItemsForm />} />
-					<Route path='نسب-الربح' element={<ProfitPercent />} />
+				<Route path="/items" element={<Items />} />
+				<Route path='/items/add' element={<ItemsForm />} />
+				<Route path='/items/edit/:id' element={<ItemsForm />} />
+				<Route path='/items/edit-profit-percentages' element={<ProfitPercent />} />
+
+				<Route path="/repositories" element={<Repositories />} />
+				<Route path='/repositories/add' element={<RepositoriesForm />} />
+				<Route path='/repositories/edit/:id' element={<RepositoriesForm />} />
+
+				<Route path='/clients-suppliers' element={<ClientSupplier isClient={true} />} />
+				<Route path='/clients-suppliers/add' element={<ClientSupplierForm isClient={true} />}/>
+				<Route path='/clients-suppliers/edit/:id' element={<ClientSupplierForm isClient={true} />}/>
+				
+				<Route path='/invoices' element={<InvoicesList />}>
+					{/* <Route path='list' element={<InvoicesList />}> */}
+					{/* </Route> */}
+						<Route path=':id/items' element={<InvoiceItems />} />
 				</Route>
-				<Route path="/المخازن" element={<Repositories />}>
-					<Route path='ادراج' element={<RepositoriesForm />} />
-					<Route path='تعديل/:id' element={<RepositoriesForm />} />
-				</Route>
-				<Route path='/العملاء-الموردين' element={<ClientSupplier isClient={true} />}>
-					<Route path='ادراج' element={<ClientSupplierForm isClient={true} />}/>
-					<Route path='تعديل/:id' element={<ClientSupplierForm isClient={true} />}/>
-				</Route>
-				<Route path='/الفواتير' element={<Invoices />}>
-					{/* <Route path='ادراج' element={<ClientSupplierForm />}/> */}
-					{/* <Route path='تعديل/:type/:id' element={<InvoiceForm />}/> */}
-				</Route>
+				<Route path='/invoices/crud' element={<InvoiceForm />} />
 				<Route path="*" element={<PageNotFound />} />
 			</Route>
 		</>
@@ -81,6 +89,7 @@ const router = createBrowserRouter(
 function App() {
 	return (
 		<>
+		
 			<RouterProvider router={router} />
 			{/* <Router>
         <Routes>

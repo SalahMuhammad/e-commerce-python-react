@@ -8,6 +8,7 @@ import useData, { useData2 } from "../custom-hooks/useData";
 import { getCookie } from "../utilities";
 import { notify } from "../notification";
 import MyGroup from "../common/FormGroup"
+import { useAltShortcut } from "../custom-hooks/useShorcut";
 
 
 const initialData = {name:'', price1: '', price2: '', price3: '', price4: '', barcodes: []}
@@ -50,12 +51,13 @@ export default function ItemsForm() {
 				itemNameRef.current.focus()
 				setData(initialData)
 			} else {
-				navigate('../')
+				navigate('/items')
 			}
 		} else if (statusCode === 400) {
 			setErrors(error);
 		}
 	}	
+	useAltShortcut(handleSubmit, 13)
 
 	const handleOnAddBracodeClick = (e) => {
 		e.preventDefault()
@@ -75,8 +77,12 @@ export default function ItemsForm() {
 		})
 	}
 
+	const handleDeleteBarcode = (e, i) => {
+		setData(prev => ({...prev, barcodes: prev.barcodes.filter((_, index) => index !== i)}))
+	}
+
 	return (
-		<MyModal title={id ? `تعديل ${data.name}` : "اضافه صنف"} onSubmit={handleSubmit}>
+		// <MyModal title={id ? `تعديل ${data.name}` : "اضافه صنف"} onSubmit={handleSubmit}>
 			<Form>
 				{(loading && (method != 'post')) && <p style={{color: 'red'}}>جار تحميل البيانات...</p>}
 				
@@ -164,14 +170,16 @@ export default function ItemsForm() {
 				</MyGroup>
 
 				<hr />
-				<button className="no-style" onClick={handleOnAddBracodeClick}>
-					<i className="fa-solid fa-plus" ></i>
+				<button className="" onClick={handleOnAddBracodeClick}>
+					اضافه باركود<i className="fa-solid fa-plus" ></i>
 				</button>
 				{data.barcodes && data.barcodes.map((barcode, index) => (
 					<MyGroup key={barcode.id||index} feedback={errors.barcodes?.[index] ? errors.barcodes[index].barcode : ''}>{/*errors.barcodes[index] ||errors.barcodes[index]*/}
+						<button className="no-style" onClick={() => handleDeleteBarcode(null, index)}><i className="fa-solid fa-trash-can"></i></button>
 						<Form.Control
+							autoFocus
 							value={barcode.barcode}
-							placeholder="باركود"
+							placeholder={`باركود ${index + 1}`}
 							onChange={(e) => handleBarcodeChange(e, index)}
 							isInvalid={errors.barcodes?.[index] ? true : false}
 							required
@@ -179,7 +187,7 @@ export default function ItemsForm() {
 					</MyGroup>
 				))}
 
-				<MyGroup label='الصور' feedback=''>
+				<MyGroup label={`${data.images_upload || data.images?.length}الصور`} feedback=''>
 					<input 
 						style={{borderColor: errors.images_upload ? 'red' : 'inhrit'}}
 						className="form-control" 
@@ -232,7 +240,6 @@ export default function ItemsForm() {
 					/>
 					{errors.images_upload && <span style={{color: 'red'}}>{errors.images_upload}</span>}
 				</MyGroup>
-
 				{method !== 'post' && <Button variant='danger' className="mt-3" onClick={() => {
 					method = 'delete';
 					if (handleDelete()) {
@@ -242,8 +249,24 @@ export default function ItemsForm() {
 						method = 'put'
 					}}}>حذف</Button>
 				}
+
+<hr />
+				<Button variant="secondary" onClick={() => navigate(-1)}>
+					الغاء
+				</Button>
+				<Button variant="primary" onClick={handleSubmit}>
+					{/* {disabled && (
+						<Spinner
+							as="span"
+							animation="border"
+							size="sm"
+							role="status"
+							aria-hidden="true"
+						/>
+					)}{" "} */}
+					<span>{true ? "حفظ" : "جار التحميل..."}</span>
+				</Button>
 			</Form>
-		</MyModal>
 	);
 }
 
