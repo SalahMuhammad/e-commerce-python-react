@@ -10,7 +10,10 @@ class JSONOnlyMiddleware:
 		method = request.method
 
 # fffffffffffffffffffffffffffffffffffff
-		if request.build_absolute_uri().__contains__('getbarcode'):
+		# if request.build_absolute_uri().__contains__('getbarcode'):
+		# 	return self.get_response(request)
+
+		if request.build_absolute_uri().__contains__('8000/admin'):
 			return self.get_response(request)
 		
 		if method in ('OPTIONS', 'DELETE'):
