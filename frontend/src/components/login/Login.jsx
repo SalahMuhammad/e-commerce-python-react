@@ -6,9 +6,15 @@ import { notify } from "../notification";
 import { setCookie } from "../utilities";
 import { login } from '../api';
 import FieldBox from "../common/FieldBox";
+import Sidebar from "../header/Header2";
 
 
 export default function Login() {
+	const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  const toggleSidebar = () => {
+    setIsSidebarOpen(!isSidebarOpen);
+  };
 	const usernameAttributes = useFormInput('')
 	const passwordAttributes = useFormInput('')
 	const [errors, setErrors] = useState({})
@@ -25,7 +31,7 @@ export default function Login() {
 			.then((response) => {
 				if (response.status === 200) {
 					setCookie('auth', response.data['jwt'], 1)
-					navigate('/الاصناف', { replace: true })
+					navigate('/items', { replace: true })
 					return
 				}
 				else if (response.response) {
@@ -35,7 +41,7 @@ export default function Login() {
 				}
 			})
 	}
-
+	
 	return (
 		<div className="container padding-top">
 			<form onSubmit={handleSubmit} className="login-form">

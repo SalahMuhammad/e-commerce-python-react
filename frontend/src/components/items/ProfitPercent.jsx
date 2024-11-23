@@ -7,6 +7,8 @@ import { useData2 } from "../custom-hooks/useData";
 import { sendRequest } from "../api";
 import { notify } from "../notification";
 import { setCookie } from "../utilities";
+import { Button } from "react-bootstrap";
+import { useAltShortcut } from "../custom-hooks/useShorcut";
 
 
 export default function ProfitPercent() {
@@ -40,18 +42,19 @@ export default function ProfitPercent() {
 
 		if (statusCode === 201) {
             setCookie('pp', JSON.stringify(data), 365)
-            navigate('../')
+            navigate('/items')
             return
 		} else if (statusCode === 400) {
             notify('error', error['detail'] || '')
 
         }
-	}	
+	}
+    useAltShortcut(handleSubmit, 13)
 
     return (
-        <MyModal title={"تحديد نسب الربح"} onSubmit={handleSubmit}>
-            {loading && <span style={{color: 'red'}}>جار التحميل...</span>}
-            <Form>
+        
+        <Form>
+                {loading && <span style={{color: 'red'}}>جار التحميل...</span>}
                 <MyGroup label='خاص' feedback={'error'}> 
                     <Form.Control
                         name='price2'
@@ -79,7 +82,24 @@ export default function ProfitPercent() {
                         {...commonAttribute}
                     />
                 </MyGroup>
+
+                <hr />
+				<Button variant="secondary" onClick={() => navigate(-1)}>
+					الغاء
+				</Button>
+				<Button variant="primary" onClick={handleSubmit}>
+					{/* {disabled && (
+						<Spinner
+							as="span"
+							animation="border"
+							size="sm"
+							role="status"
+							aria-hidden="true"
+						/>
+					)}{" "} */}
+					<span>{true ? "حفظ" : "جار التحميل..."}</span>
+				</Button>
             </Form>
-        </MyModal>
+        
     )
 }

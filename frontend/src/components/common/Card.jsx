@@ -21,7 +21,7 @@ function MyCard({ item }) {
 				</Card.Header>
 				<Card.Body>
 					<Card.Title>
-						{item.images/*.some((src) => src.includes('http'))*/ && <MyCarousel srcs={item.images} />}
+						{item.images.length > 0/*.some((src) => src.includes('http'))*/ && <MyCarousel srcs={item.images} />}
 					</Card.Title>
 					<Card.Text style={{ color: 'green', fontWeight: 'bold' }}>
 						{item.name}
@@ -35,7 +35,7 @@ function MyCard({ item }) {
 					</Card.Text>
 				</Card.Body>
 				<Card.Footer className="text-muted">
-					<Link to={`تعديل/${item.id}`}><i className="fa-solid fa-pen-to-square"></i></Link>
+					<Link to={`edit/${item.id}`}><i className="fa-solid fa-pen-to-square"></i></Link>
 					<Tooltip endpoint={`items/${item.id}`} />
 					<button className="no-style" onClick={handleShow}>
 						<i className="fa-solid fa-warehouse"></i>

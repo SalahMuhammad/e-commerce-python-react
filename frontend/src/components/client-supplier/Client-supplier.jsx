@@ -27,10 +27,7 @@ export default function ClientSupplier({ isClient }) {
 		<>
 			<Outlet />
 			<div className="container">
-                <div className="top">	
-                    <Link className="btn btn-success" to={'ادراج'} >
-                        اضافه
-                    </Link>
+				<div className="top">
 					{/* <input className="form-control" type="text" placeholder="بحث" onChange={handleSearchInputOnChange} /> */}
 				</div>
 				<Table theadList={['#', 'الاسم', 'التفاصيل']} caption={`${isClient ? 'العملاء' : 'الموردين'} ${data.count}/${data.results.length}`}>
@@ -38,7 +35,7 @@ export default function ClientSupplier({ isClient }) {
 						{data.results && data.results.map((obj) => (
 							<tr key={obj.id}>
 								<th>
-									<Link to={`تعديل/${obj.id}`}><i className="fa-solid fa-pen-to-square"></i></Link>
+									<Link to={`edit/${obj.id}`}><i className="fa-solid fa-pen-to-square"></i></Link>
 									<Tooltip endpoint={`owners/${obj.id}`} />
 								</th>
 								<td>{obj.name}</td>
@@ -46,7 +43,7 @@ export default function ClientSupplier({ isClient }) {
 							</tr>
 						))}
 					</tbody>
-                </Table>
+				</Table>
 			</div>
 		</>
 	)

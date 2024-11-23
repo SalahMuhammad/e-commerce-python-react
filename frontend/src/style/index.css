@@ -1,4 +1,5 @@
-@import url("invoice-form.css");
+@import url("invoices-form.css");
+@import url("invoices-list.css");
 
 :root {
 	font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
@@ -21,6 +22,11 @@
 	box-sizing: border-box;
 	margin: 0;
 	padding: 0;
+}
+
+.custome-container {
+	margin-right: 250px;
+	padding: 0 2rem;
 }
 
 .container {

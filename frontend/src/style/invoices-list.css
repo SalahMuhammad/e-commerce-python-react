@@ -1,0 +1,22 @@
+.p-inv::before,
+.s-inv::before {
+    content: '';
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+}
+
+.p-inv::before {
+    content: 'ش';
+    background-color: green;
+}
+
+.s-inv::before {
+    content: 'ع';
+    background-color: red;
+}
+
+.invoices-list-tbody tr {
+    cursor: pointer;
+}

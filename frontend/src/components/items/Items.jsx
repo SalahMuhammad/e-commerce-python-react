@@ -22,7 +22,7 @@ export default function Items() {
 	function handleSearchInputOnChange(value) {
 		setUrl(`api/items/?s=${value}&fields=${fields}`)
 	}
-
+	
 	return (
 		<>
 			<Outlet />
@@ -30,7 +30,7 @@ export default function Items() {
 			<div className="container">
 				
 				<div className="top">
-					<SplitBasicExample />
+					{/* <SplitBasicExample /> */}
 					<SearchInput label={'اسم الصنف'} onChange={handleSearchInputOnChange} />
 					<p>{data.count + '/' + data.results.length}</p>
 				</div>

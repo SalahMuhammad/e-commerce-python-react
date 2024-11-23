@@ -7,94 +7,115 @@ import Table from "../common/Table"
 import { getCookie, setCookie } from "../utilities"
 import { sendRequest } from "../api"
 import useData from "../custom-hooks/useData"
+import { useAltShortcut } from "../custom-hooks/useShorcut"
+
+import { useCallback } from "react"
+import InvoiceItemsForm from "./InvoiceItemsForm"
+import { useEffect } from "react"
 
 
-const initialData = (id) => [{uuid: id, is_purchase_invoice: 0, paid: 0, owner_name: '', repository_name: '', items: []}]
+const initialData = (id, is_purchase_invoice = false, owner_name = '', owner = null, repository_name = '', repository = null) => ({uuid: id, is_purchase_invoice: is_purchase_invoice, paid: 0, owner: owner, owner_name: owner_name, repository: repository, repository_name: repository_name, items: []})
 const InvoiceForm = () => {
-	const [invoices, setInvoices] = useState(getCookie('invoices').length !== 0 ? getCookie('invoices') : initialData(crypto.randomUUID()))
+	// document.title = 'اضافه-تعديل-حذف'
+	const [invoices, setInvoices] = useState(getCookie('invoices') ? getCookie('invoices') : [initialData(crypto.randomUUID())])
 	const [errors, setErrors] = useState([])
+	const [currentInvoiceIndex, setCurrentInvoiceIndex] = useState(0);
+	const invoice = invoices[currentInvoiceIndex]
+	// useAddItemShorcut(handleAddItem)
+	const [items, setItems] = useState(invoice.items);
 
+
+	invoices[currentInvoiceIndex].items = items
 	if (JSON.stringify(getCookie('invoices')) != JSON.stringify(invoices)) {
 		setCookie('invoices', JSON.stringify(invoices), 7)
 	}
 
-	const handleAddInvoice = () => {
-		const a = invoices[invoices.length-1]
-		setInvoices((prev) => ([
-			...prev,
-			{
-				...a,
-				uuid: crypto.randomUUID(),
-				paid: 0,
-				items: []
-			}
-		]))
-	}
+	const addNewItem = () => {
+		setItems(prevItems => {
+			// return [...prevItems, { ...initialItemState }]
+			return [...prevItems, initialItemState]
+		});
+	};
+	useAltShortcut(addNewItem, 73); // i
 
-	const handleDeleteItem = (invoice, itemId) => {
-		setInvoices((prev) => (
-			prev.map((inv) => {
-				if ((inv.uuid || inv.id) === (invoice.uuid || invoice.id)) {
-					inv.items = inv.items.filter(i => {
-						if (i.item === itemId) {
-							inv.paid -= Number(i.quantity * i.unit_price)
-							return false
-						}
-						return true
-					})
-				}
-				return inv
-			})
-		))
-	}
+	const deleteItem = (indexToDelete) => {
+		if (items.length <= 1) {
+			return; // Don't delete if it's the last item
+		}
+		setItems(prevItems => {
+            return prevItems.filter((_, index) => index !== indexToDelete);
+        });
+	};
 
-	const handleSubmit = async (invoice, method) => {
-		if (invoice.items.length === 0) {
-			notify('error', 'يجب اختيارؤ صنف واحد على الاقل...')
+	const handleDeleteInvoice = () => {
+		if (invoices.length === 1) {
+			setInvoices([initialData(crypto.randomUUID(), invoice?.is_purchase_invoice||false, invoice.owner_name, invoice.owner, invoice.repository_name, invoice.repository)])
+			setItems([initialItemState])
 			return
 		}
-		setErrors({})
-
+		const newInvoiceIndex = currentInvoiceIndex > 0 ? currentInvoiceIndex - 1 : 0
+		const invs = invoices.filter((_, index) => index !== currentInvoiceIndex)
+		setInvoices(invs)
+		setItems(invs[newInvoiceIndex].items)
+		setCurrentInvoiceIndex(newInvoiceIndex)
 		
+	}
+	useAltShortcut(handleDeleteInvoice, 46); // i
+
+	const handleAddInvoice = () => {
+		// const a = invoices[invoices.length-1]
+		setInvoices((prev) => ([
+			...prev,
+			initialData(crypto.randomUUID(), invoice?.is_purchase_invoice||false, invoice.owner_name, invoice.owner, invoice.repository_name, invoice.repository)
+		]))
+		setItems([initialItemState])
+		setCurrentInvoiceIndex(invoices.length)
+	}
+	useAltShortcut(handleAddInvoice, 78); // n
+	
+	const handleSubmit = async (method) => {
+		setErrors({})
+console.log(invoice)
+		// invoice.items = items
 		const {error, statusCode} = await sendRequest(
 			method, 
 			`api/invoices/${invoice.id ? `${invoice.id}/` : ''}`, 
-			invoice, 
+			{
+				...invoices[currentInvoiceIndex],
+				items: items
+			}, 
 			'الفاتوره'
 		)
 
 		if ([200, 201, 204].includes(statusCode)) {
-			if (invoices.length === 1) {
-				setInvoices([{
-					...invoices[0],
-					paid: 0,
-					items: []
-				}])
-			} else {
-				setInvoices([...invoices].filter((inv) => (inv.uuid || inv.id) != (invoice.uuid || invoice.id)))
-			}
+			handleDeleteInvoice()
 		} else if (statusCode === 400) {
 			setErrors(error);
 			notify('error', error?.detail ? error.detail[0] : null)
 		}
-	}	
-
-
-	const handleDeleteInvoice = (index) => {
-		if (invoices.length === 1) return
-		setInvoices([...invoices].filter((_, index1) => index != index1))
 	}
+	console.log(errors)
+	useAltShortcut(() => handleSubmit(invoice.id ? 'patch' : 'post'), 13); // n
 
 	return (
 		<div className="slider">
-			{invoices.map((invoice, index) => (							
-				<div key={invoice.uuid || invoice.id} className="invoice-form">
-					<div className="controls mb-3">
-						<Button variant="success" onClick={() => handleSubmit(invoice, invoice.id ? 'patch' : 'post')}>{invoice.id ? 'تعديل': 'اضافه'} الفاتوره</Button>
-						<button className="no-style" onClick={handleAddInvoice}><i className="fa-solid fa-plus" ></i></button>
-						<button className="no-style" onClick={() => handleDeleteInvoice(index)}><i className="fa-solid fa-trash-can"></i></button>
-						{invoice.id && <Button variant="danger" onClick={() => {confirm('هل انت متاكد من انك تريد حذف الفاتوره!؟') && handleSubmit(invoice, 'delete')}}>حذف</Button>}
-					</div>
+			<FormNavigation invoices={invoices} currentInvoiceIndex={currentInvoiceIndex} setCurrentInvoiceIndex={setCurrentInvoiceIndex} setItems={setItems}>
+				<button title="(Alt + n)" className="btn btn-secondary" onClick={handleAddInvoice}>فاتوره جديده <i className="fa-solid fa-plus" ></i></button>
+			</FormNavigation>
+		
+			<div key={invoice.uuid || invoice.id} className="invoice-form">
+				<div className="controls mb-3">
+					<Button variant="success" onClick={() => handleSubmit(invoice.id ? 'patch' : 'post')}>{invoice?.id ? 'تعديل': 'اضافه'} الفاتوره</Button>
+					<button className="no-style" onClick={handleDeleteInvoice}><i className="fa-solid fa-trash-can"></i></button>
+					{invoice?.id && <Button variant="danger" onClick={() => {confirm('هل انت متاكد من انك تريد حذف الفاتوره!؟') && handleSubmit(invoice, 'delete')}}>حذف</Button>}
+				</div>
+				<form action="">
+				{true ? (
+					<>
+						<InvoiceDetailForm invoice={invoice} setInvoices={setInvoices} errors={errors} index={currentInvoiceIndex} />
+						{/* <InvoiceItemsForm setInvoices={setInvoices} index={currentInvoiceIndex} /> */}
+					</>
+				) : (
 					<Accordion className="form">
 						<Accordion.Item eventKey="0">
 							<Accordion.Header>
@@ -104,162 +125,64 @@ const InvoiceForm = () => {
 								,&nbsp;{invoice.repository_name}
 							</Accordion.Header>
 							<Accordion.Body>
-								<InvoiceDetailForm invoice={invoice} setInvoices={setInvoices} errors={errors} index={index} />
+								<InvoiceDetailForm invoice={invoice} setInvoices={setInvoices} errors={errors} index={currentInvoiceIndex} />
 							</Accordion.Body>
 						</Accordion.Item>
 						<Accordion.Item eventKey="1">
 							<Accordion.Header>اضافه صنف</Accordion.Header>
 							<Accordion.Body>
-								<InvoiceItemsForm setInvoices={setInvoices} index={index} />
+								<InvoiceItemsForm setInvoices={setInvoices} index={currentInvoiceIndex} />
 							</Accordion.Body>
 						</Accordion.Item>
 					</Accordion>
-					<Table theadList={['#', 'اسم الصنف', 'عدد القطع', 'سعر القطعه']}>
-						<tbody>
-							{invoice.items.map((item, index) => (
-								<tr key={index}>
-									<td><button className="no-style" onClick={() => handleDeleteItem(invoice, item.item)}><i className="fa-solid fa-trash-can"></i></button></td>
-									<td>
-										{item.item_name}
-										{errors[index]?.item}
-									</td>
-									<td>{item.quantity}</td>
-									<td>{item.unit_price}</td>
-								</tr>
-							))}
-						</tbody>
-						<tfoot>
-							<tr style={{alignItems: 'center'}}>
-								<td>اجمالى</td>
-								<td colSpan={3} style={{textAlign: 'center'}}>
-									{invoice.items.reduce((sum, item) => {
-										return sum + (item.quantity * item.unit_price);
-									}, 0)}
-								</td>
-							</tr>
-						</tfoot>
-					</Table>
-				</div>
-			))}
+				)}
+				<Table theadList={['#', 'اسم الصنف', 'عدد القطع', 'سعر القطعه']}>
+					<tbody>
+						{items.map((item, index) => (
+								// <InvoiceItemsForm key={index} setInvoices={setInvoices} itemIndex={index} invoiceIndex={currentInvoiceIndex} />
+								<InvoiceItemsForm 
+									key={index} 
+									item={item}
+									setItems={setItems} 
+									itemIndex={index} 
+									onDelete={() => deleteItem(index)}
+								/>
+							// <tr key={index}>
+							
+							// 	{/* <td>
+							// 		{item.item_name}
+							// 		{errors[index]?.item}
+							// 	</td>
+							// 	<td>{item.quantity}</td>
+							// 	<td>{item.unit_price}</td> */}
+							// </tr>
+						))}
+					</tbody>
+					<tfoot>
+						<tr style={{alignItems: 'center'}}>
+							<td title="(ALT + i)" colSpan={2} onClick={addNewItem}><i className="fa-solid fa-plus"></i></td>
+							<td>اجمالى</td>
+							<td  style={{textAlign: 'center'}}>
+								{invoice.items?.reduce((sum, item) => {
+									return sum + (item.quantity * item.unit_price);
+								}, 0)}
+							</td>
+						</tr>
+					</tfoot>
+				</Table>
+			</form>
+			</div>
 		</div>
 	)
 }
 
 
-const aaa = {item: '', unit_price: 0, quantity: 1, item_name: ''}
-const InvoiceItemsForm = ({ setInvoices, index }) => {
-	const [item, setItem] = useState(aaa)
-	const { data } = useData(`api/items/?s=${item.item_name}`)
-	const results = data.results
-	const isResultEmpty = results.length === 0
-	const itemRef = useRef(null)
-
-
-	const isItemNull = () => {
-		return item.item_name === '' || results.length !== 1
-	}
-
-	const handleKeyDown = (e) => {
-		if (isItemNull()) return
-		if (e.key === 'Enter') {
-			const newItem = {
-				item: results[0].id,
-				item_name: results[0].name,
-				quantity: item?.quantity || 1,
-				unit_price: item?.unit_price || results[0].price4
-			}
-		
-			setInvoices((prev) => updateInvoiceItems(prev, index, newItem))
-			setItem(aaa)
-			itemRef.current.focus();
-		}
-	}
-
-	const handleOnBlur = () => {
-		if (isItemNull()) return
-
-		setItem((prev) => ({
-			...prev,
-			item: results[0].id,
-			item_name: results[0].name,
-			quantity: item?.quantity || 1,
-			unit_price: item?.unit_price || results[0].price4
-		}))
-	}
-
-	const handleChange = (e) => {
-		let {name, value} = e.target
-		setItem((prev) => ({
-			...prev,
-			[name]: value
-		}))
-	}
-
-	const handleOnClickAdd = () => {
-		if (isItemNull()) return
-		
-		setInvoices((prev) => updateInvoiceItems(prev, index, item))
-		setItem(aaa)
-		itemRef.current.focus();
-	}
-
-	const handleOnFocus = (e) => {
-		e.target.select()
-	}
-
-	return (
-		<div className="items">
-			<MyGroup label={'اسم الصنف'} feedback={isResultEmpty ? `${item.item_name} غير موجود... 😵` : ''}> 
-				<Form.Control
-					ref={itemRef}
-					autoComplete="off"
-					type="text"
-					placeholder={'اسم الصنف'}
-					list='items'
-					name='item_name'
-					value={item.item_name}
-					onChange={handleChange}
-					onKeyDown={handleKeyDown}
-					onBlur={handleOnBlur}
-					onFocus={handleOnFocus}
-					isInvalid={isResultEmpty ? true : false}
-				/>
-				<datalist id='items'>
-					{data.results && data.results.map((item) => (
-						<option key={item.id} value={item.name} />
-					))}
-				</datalist>
-			</MyGroup>
-			{/* <InvoiceFormSearchField label={'اسم الصنف'} onEnterKeyDown={handleKeyDown} endpotin={'items'} onBlur={handleOnBlur} /> */}
-			<MyGroup label='عدد القطع' feedback={''}>
-				<Form.Control
-					type="number"
-					name='quantity'
-					onKeyDown={(e) => (e.key === 'Enter') && handleOnClickAdd()}
-					value={item.quantity}
-					placeholder="عدد القطع"
-					onChange={handleChange}
-					isInvalid={false}
-					onFocus={handleOnFocus}
-				/>
-			</MyGroup>
-			<MyGroup label='سعر القطعه' feedback={''}>
-				<Form.Control
-					type="number"
-					name='unit_price'
-					onKeyDown={(e) => (e.key === 'Enter') && handleOnClickAdd()}
-					value={item.unit_price}
-					placeholder="سعر القطعه"
-					onChange={handleChange}
-					isInvalid={false}
-					onFocus={handleOnFocus}
-				/>
-			</MyGroup>	
-
-			<button className="btn btn-success" onClick={handleOnClickAdd}><i className="fa-solid fa-plus" ></i></button>
-		</div>
-	)
-}
+const initialItemState = {
+	item_name: '',
+	item: null,
+	quantity: 1,
+	unit_price: 0
+  };
 
 const InvoiceDetailForm = ({ invoice, setInvoices, errors, index }) => {
 	const handleOnChange = (e) => {
@@ -284,9 +207,9 @@ const InvoiceDetailForm = ({ invoice, setInvoices, errors, index }) => {
 
 	return (
 		<div className="detail">
-			<Form.Select className="" defaultValue={invoice.is_purchase_invoice ? 1 : 0} name="is_purchase_invoice" aria-label="Default select example" onChange={handleOnChange}>
-				<option value="0">مبيعات</option>
-				<option value="1">مشتريات</option>
+			<Form.Select defaultValue={invoice.is_purchase_invoice || false} name="is_purchase_invoice" aria-label="Default select example" onChange={handleOnChange}>
+				<option value={false}>مبيعات</option>
+				<option value={true}>مشتريات</option>
 			</Form.Select>
 			<InvoiceFormSearchField label={'مورد/عميل'} v={invoice.owner_name} name={'owner'} onBlur={handleOnBlur1} endpotin={'owners'} errors={errors} />
 			<InvoiceFormSearchField label={'مخزن'} v={invoice.repository_name} name={'repository'} onBlur={handleOnBlur1} endpotin={'repositories'} errors={errors} />
@@ -306,34 +229,42 @@ const InvoiceDetailForm = ({ invoice, setInvoices, errors, index }) => {
 	)
 }
 
+const FormNavigation = ({ invoices, currentInvoiceIndex, setCurrentInvoiceIndex, setItems, children }) => {
+	const handleToggleInvoice = useCallback((direction) => () => {
+        setCurrentInvoiceIndex((prev) => {
+            const val = direction === 'next'
+                ? Math.min(prev + 1, invoices.length - 1)
+                : Math.max(prev - 1, 0);
+            
+            if (val >= 0 && val < invoices.length) {
+                setItems(invoices[val].items);
+            }
+            
+            return val;
+        });
+    }, [invoices, setItems, setCurrentInvoiceIndex]);
+	useAltShortcut(handleToggleInvoice('prev'), 190)
+	useAltShortcut(handleToggleInvoice('next'), 188)
+
+	return (
+		<div className="invoice-navigation">
+			<Button onClick={() => handleToggleInvoice('prev')()} disabled={currentInvoiceIndex === 0}>
+				<i className="fa-solid fa-angles-right"></i>
+			</Button>
+			<span>
+				فاتوره {currentInvoiceIndex + 1} من {invoices.length}
+			</span>
+			<Button onClick={() => handleToggleInvoice('next')()} disabled={currentInvoiceIndex === invoices.length - 1}>
+				<i className="fa-solid fa-angles-left"></i>
+			</Button>
+			{children}
+		</div>
+	)
+}
+
 
 export default InvoiceForm
 
-
-function addItemToItemsList(items, newItem) {
-	const index = items.findIndex((i) => i.item === newItem.item)
-
-	if (index !== -1) {
-		items[index].quantity = Number(items[index].quantity) + Number(newItem.quantity)
-		items[index].unit_price = newItem.unit_price
-		return items
-	}
-
-	items.push(newItem)
-	return items
-}
-
-const updateInvoiceItems = (invoices, index, newItem) => {
-	const newInvoices = [...invoices]
-	const updatedInvoice = {...newInvoices[index]}
-	updatedInvoice.items = addItemToItemsList(updatedInvoice.items, newItem);
-	updatedInvoice.paid = updatedInvoice.items.reduce((sum, item) => 
-		sum + (item.quantity * item.unit_price)
-	, 0)
-	newInvoices[index] = updatedInvoice;
-
-	return newInvoices
-}
 
 const updateInvoiceDetail = (invoices, index, name, data) => {
 	const newInvoices = [...invoices]

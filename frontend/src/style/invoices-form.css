@@ -6,12 +6,14 @@
     box-shadow: .5rem .5rem 1rem rgba(0 0 0 / .2);
 }
 
-.invoice-form .form .detail {
+.invoice-form .form .detail,
+.invoice-form .detail {
         display: flex;
         gap: .5rem;
 }
 
-.invoice-form .form .items {
+.invoice-form .form .items,
+.invoice-form .items {
     display: flex;
     gap: .5rem;
 }
@@ -29,68 +31,57 @@
 }
 
 .slider {
-    width: 100%;
+    /* width: 100%; */
     display: flex;
+    flex-direction: column;
+    gap: 1rem;
     /* background-color: red; */
-    overflow-x: scroll;
-    scroll-behavior: smooth;
+    /* overflow-x: scroll;
+    scroll-behavior: smooth; */
     /* white-space: nowrap; */
     width: 100%; /* or any specific width */
     padding: 0 .5rem;
-    box-shadow: .5rem .5rem 1rem rgba(0 0 0 / .1);
+    /* box-shadow: .5rem .5rem 1rem rgba(0 0 0 / .1); */
+}
+
+.slider .invoice-navigation {
+    display: flex;
+    gap: 1rem;
+}
+
+.slider .invoice-form {
+    position: relative;
+    right: -100%;
+    animation: slide-animation .5s forwards ease-in-out;
+}
+@keyframes slide-animation {
+    to {
+        right: 0;
+    }
+    
 }
 
 .slider::-webkit-scrollbar {
     display: none;
 }
 
-.slider > div {
+/* .slider > div {
     width: 100%;
     padding: 10px;
     flex: none;
-    /* background-color: blue; */
-}
+    background-color: blue;
+} */
 
-.invoices-navs {
+/* .invoices-navs {
     display: flex;
     gap: .5rem;
-}
+} */
 
-.invoices-navs img {
+/* .invoices-navs img {
     width: 2rem;
     cursor: pointer;
     margin: 0 1rem;    
-}
-
-
-/* General pseudo-element styles for the mark */
-.p-inv::before,
-.s-inv::before {
-    content: '';
-    display: inline-block;
-    width: 8px;  /* Adjust width as needed */
-    height: 8px; /* Adjust height as needed */
-    border-radius: 50%; /* Makes it a circle */
-
-}
-
-/* Specific color for p-inv */
-.p-inv::before {
-    background-color: green;
-}
-
-/* Specific color for s-inv */
-.s-inv::before {
-    background-color: red;
-}
-
-.inv-items {
-    display: none;
-}
-
-.inv-items.active {
-    display: table-row;
-}
+} */
 
 /* .invoice-form .detail > div {
     width: 10px;
