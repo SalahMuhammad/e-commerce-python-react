@@ -92,28 +92,31 @@ export const CustomSearchInput = ({ label, onChange, endpotin }) => {
 export default SearchInput
 
 
-export const InvoiceFormSearchField = ({ label, name, v, onBlur, onEnterKeyDown, endpotin, errors }) => {
+export const InvoiceFormSearchField = ({ label, name, v='', onBlur, onEnterKeyDown, endpotin, errors }) => {
 	const [value, setValue]	= useState(v)
 	const { data } = useData(`api/${endpotin}/?s=${value}`)
+	const isResultEmpty = data.results.length === 0
 	const id = crypto.randomUUID()
-// idddidididididididididid generated on each state change
+	
 	const handleOnChange = (e) => {
+		errors = []
 		setValue(e.target.value)
 	};
 
 	const handleOnKeyDown = (e) => {
 		if (e.key === 'Enter') {
 			onEnterKeyDown && onEnterKeyDown(data, name, value)
-			setValue('')
+			!name && setValue('')
+			name && e.target.blur()
 		}
 	}
 
 	const handleOnBlur = () => {
-		onBlur && onBlur(data, name, value)
+		onBlur && onBlur(data, name)
 	}
 
 	return (
-		<MyGroup label={label} feedback={errors?.[name] ? errors?.[name][0] : ''}> 
+		<MyGroup label={label} feedback={isResultEmpty || errors?.[name] ? `${value} غير موجود... 😵` : ''}> 
 			<Form.Control
 				autoComplete="off"
 				type="text"
@@ -125,7 +128,7 @@ export const InvoiceFormSearchField = ({ label, name, v, onBlur, onEnterKeyDown,
 				onKeyDown={handleOnKeyDown}
 				onBlur={handleOnBlur}
 				onFocus={(e) => e.target.select()}
-				isInvalid={errors?.[name] ? true : false}
+				isInvalid={isResultEmpty || errors?.[name] ? true : false}
 			/>
 			<datalist id={id}>
 				{data.results && data.results.map((item) => (

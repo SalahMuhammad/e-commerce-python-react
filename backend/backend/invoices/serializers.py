@@ -63,7 +63,7 @@ class InvoiceSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         invoice_items_data = validated_data.pop('items', [])
-        is_purchase_invoice = True if validated_data['is_purchase_invoice'] else False
+        is_purchase_invoice = True if validated_data.get('is_purchase_invoice', 1) else False
 
 
         if validated_data.get('paid', None) != None and not validated_data.get('owner', None):

@@ -30,6 +30,7 @@ from django.core.files import File
 import tempfile
 import shutil
 from .delete_unsed_images import delete_unused_imagesss
+from django.db.utils import IntegrityError
 
 
 
@@ -123,9 +124,27 @@ class ItemDetail(mixins.RetrieveModelMixin,
 
 	def put(self, request,*args, **kwargs):
 		instance = self.get_object()
-		request.data.pop('barcodes', None) if instance.barcodes.all() else ''
-		return super().partial_update(request, *args, **kwargs)
-  
+		with transaction.atomic():
+			barcodes_data = request.data.get('barcodes', None)
+			barcodes = instance.barcodes.all()
+			if barcodes_data:
+				for b in barcodes_data:
+					if b.get('id', None):
+						i = barcodes.get(pk=b['id'])
+						i.barcode = b['barcode']
+						i.save()
+						barcodes = barcodes.exclude(id=b['id'])
+					else:
+						try:
+							i = instance.barcodes.create(barcode=b['barcode'])
+							barcodes = barcodes.exclude(id=i.id)
+						except IntegrityError as e:
+							return Response({'detail': f'باركود مكرر \"{b.get("barcode")}\"'}, status=status.HTTP_400_BAD_REQUEST)
+				for barcode in barcodes:
+					barcode.delete()
+			request.data.pop('barcodes', None)
+			return super().partial_update(request, *args, **kwargs)
+
 	def delete(self, request, *args, **kwargs):
 		instance = self.get_object()
 		try:

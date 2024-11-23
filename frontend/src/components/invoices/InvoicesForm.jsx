@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useRef, useState } from "react"
 import { notify } from "../notification"
 import MyGroup from "../common/FormGroup"
 import { Form, Accordion, Button } from "react-bootstrap"
@@ -6,6 +6,7 @@ import { InvoiceFormSearchField } from '../common/SearchInput'
 import Table from "../common/Table"
 import { getCookie, setCookie } from "../utilities"
 import { sendRequest } from "../api"
+import useData from "../custom-hooks/useData"
 
 
 const initialData = (id) => [{uuid: id, is_purchase_invoice: 0, paid: 0, owner_name: '', repository_name: '', items: []}]
@@ -18,7 +19,7 @@ const InvoiceForm = () => {
 	}
 
 	const handleAddInvoice = () => {
-		const a = invoices.length !== 0 ? invoices[invoices.length-1] : initialData(crypto.randomUUID())
+		const a = invoices[invoices.length-1]
 		setInvoices((prev) => ([
 			...prev,
 			{
@@ -47,7 +48,7 @@ const InvoiceForm = () => {
 		))
 	}
 
-	const handleSubmit = async (invoice) => {
+	const handleSubmit = async (invoice, method) => {
 		if (invoice.items.length === 0) {
 			notify('error', 'يجب اختيارؤ صنف واحد على الاقل...')
 			return
@@ -56,7 +57,7 @@ const InvoiceForm = () => {
 
 		
 		const {error, statusCode} = await sendRequest(
-			invoice.id ? 'patch' : 'post', 
+			method, 
 			`api/invoices/${invoice.id ? `${invoice.id}/` : ''}`, 
 			invoice, 
 			'الفاتوره'
@@ -70,7 +71,7 @@ const InvoiceForm = () => {
 					items: []
 				}])
 			} else {
-				setInvoices(invoices.filter((inv) => (inv.uuid || inv.id) != (invoice.uuid || invoice.id)))
+				setInvoices([...invoices].filter((inv) => (inv.uuid || inv.id) != (invoice.uuid || invoice.id)))
 			}
 		} else if (statusCode === 400) {
 			setErrors(error);
@@ -79,18 +80,20 @@ const InvoiceForm = () => {
 	}	
 
 
-	const handleDeleteInvoice = (id) => {
-		setInvoices((prev) => prev.filter((i) => (i.uuid || i.id)!=id))
+	const handleDeleteInvoice = (index) => {
+		if (invoices.length === 1) return
+		setInvoices([...invoices].filter((_, index1) => index != index1))
 	}
 
 	return (
 		<div className="slider">
-			{invoices.map((invoice) => (							
+			{invoices.map((invoice, index) => (							
 				<div key={invoice.uuid || invoice.id} className="invoice-form">
 					<div className="controls mb-3">
-						<Button variant="success" onClick={() => handleSubmit(invoice)}>{invoice.id ? 'تعديل': 'اضافه'}</Button>
+						<Button variant="success" onClick={() => handleSubmit(invoice, invoice.id ? 'patch' : 'post')}>{invoice.id ? 'تعديل': 'اضافه'} الفاتوره</Button>
 						<button className="no-style" onClick={handleAddInvoice}><i className="fa-solid fa-plus" ></i></button>
-						<button className="no-style" onClick={() => handleDeleteInvoice(invoice.id || invoice.uuid)}><i className="fa-solid fa-trash-can"></i></button>
+						<button className="no-style" onClick={() => handleDeleteInvoice(index)}><i className="fa-solid fa-trash-can"></i></button>
+						{invoice.id && <Button variant="danger" onClick={() => {confirm('هل انت متاكد من انك تريد حذف الفاتوره!؟') && handleSubmit(invoice, 'delete')}}>حذف</Button>}
 					</div>
 					<Accordion className="form">
 						<Accordion.Item eventKey="0">
@@ -101,13 +104,13 @@ const InvoiceForm = () => {
 								,&nbsp;{invoice.repository_name}
 							</Accordion.Header>
 							<Accordion.Body>
-								<InvoiceDetailForm invoice={invoice} setInvoices={setInvoices} errors={errors} />
+								<InvoiceDetailForm invoice={invoice} setInvoices={setInvoices} errors={errors} index={index} />
 							</Accordion.Body>
 						</Accordion.Item>
 						<Accordion.Item eventKey="1">
 							<Accordion.Header>اضافه صنف</Accordion.Header>
 							<Accordion.Body>
-								<InvoiceItemsForm setInvoices={setInvoices} invoice={invoice} />
+								<InvoiceItemsForm setInvoices={setInvoices} index={index} />
 							</Accordion.Body>
 						</Accordion.Item>
 					</Accordion>
@@ -143,70 +146,48 @@ const InvoiceForm = () => {
 }
 
 
-function checkIfItemExists(invoice, newItem) {
-	let isOldItem = false
-	const aaa = invoice.items.map((i) => {
-		if (newItem.item === i.item) {
-			isOldItem = true
-			i.quantity = Number(i.quantity) + Number(newItem.quantity)
-			i.unit_price = newItem.unit_price
-		}
-		return i
-	})
-
-	return [aaa, isOldItem]
-}
-const newInvoicesList = (oldList, newItem, invoiceId) => (
-	oldList.map((inv) => {
-		if ((inv.uuid || inv.id) === invoiceId) {
-			let [newItems, isOldItem] = checkIfItemExists(inv, newItem)
-			inv.items = isOldItem ? [...newItems] : [...inv.items, newItem]
-			inv.paid += Number(newItem.quantity * newItem.unit_price)
-		}
-		return inv
-	})
-)
 const aaa = {item: '', unit_price: 0, quantity: 1, item_name: ''}
-const InvoiceItemsForm = ({ invoice, setInvoices }) => {
+const InvoiceItemsForm = ({ setInvoices, index }) => {
 	const [item, setItem] = useState(aaa)
-	const id = invoice.uuid || invoice.id
+	const { data } = useData(`api/items/?s=${item.item_name}`)
+	const results = data.results
+	const isResultEmpty = results.length === 0
+	const itemRef = useRef(null)
 
 
-	const handleOnEnterKeyDown = (itemsData, _, value) => {
-		if (value === '') return
-		if (itemsData.results.length != 1) {
-			notify('warning', `${value} غير موجود...`)
-			return 
-		}
-
-		const newItem = {
-			item: itemsData.results[0].id,
-			item_name: itemsData.results[0].name,
-			quantity: item?.quantity || 1,
-			unit_price: item?.unit_price || itemsData.results[0].price4
-		}
-	
-		setInvoices((prev) => newInvoicesList(prev, newItem, id))
-		setItem(aaa)
+	const isItemNull = () => {
+		return item.item_name === '' || results.length !== 1
 	}
 
-	const handleOnBlur = (itemsData, _, value) => {
-		if (value === '') return
-		if (itemsData.results.length != 1) {
-			notify('error', `${value} غير موجود...`)
-			return 
+	const handleKeyDown = (e) => {
+		if (isItemNull()) return
+		if (e.key === 'Enter') {
+			const newItem = {
+				item: results[0].id,
+				item_name: results[0].name,
+				quantity: item?.quantity || 1,
+				unit_price: item?.unit_price || results[0].price4
+			}
+		
+			setInvoices((prev) => updateInvoiceItems(prev, index, newItem))
+			setItem(aaa)
+			itemRef.current.focus();
 		}
+	}
+
+	const handleOnBlur = () => {
+		if (isItemNull()) return
 
 		setItem((prev) => ({
 			...prev,
-			item: itemsData.results[0].id,
-			item_name: itemsData.results[0].name,
+			item: results[0].id,
+			item_name: results[0].name,
 			quantity: item?.quantity || 1,
-			unit_price: item?.unit_price || itemsData.results[0].price4
+			unit_price: item?.unit_price || results[0].price4
 		}))
 	}
 
-	const handleOnItemsChange = (e) => {
+	const handleChange = (e) => {
 		let {name, value} = e.target
 		setItem((prev) => ({
 			...prev,
@@ -215,13 +196,41 @@ const InvoiceItemsForm = ({ invoice, setInvoices }) => {
 	}
 
 	const handleOnClickAdd = () => {
-		setInvoices((prev) => newInvoicesList(prev, item, id))
+		if (isItemNull()) return
+		
+		setInvoices((prev) => updateInvoiceItems(prev, index, item))
 		setItem(aaa)
+		itemRef.current.focus();
+	}
+
+	const handleOnFocus = (e) => {
+		e.target.select()
 	}
 
 	return (
 		<div className="items">
-			<InvoiceFormSearchField label={'اسم الصنف'} onEnterKeyDown={handleOnEnterKeyDown} endpotin={'items'} onBlur={handleOnBlur} />
+			<MyGroup label={'اسم الصنف'} feedback={isResultEmpty ? `${item.item_name} غير موجود... 😵` : ''}> 
+				<Form.Control
+					ref={itemRef}
+					autoComplete="off"
+					type="text"
+					placeholder={'اسم الصنف'}
+					list='items'
+					name='item_name'
+					value={item.item_name}
+					onChange={handleChange}
+					onKeyDown={handleKeyDown}
+					onBlur={handleOnBlur}
+					onFocus={handleOnFocus}
+					isInvalid={isResultEmpty ? true : false}
+				/>
+				<datalist id='items'>
+					{data.results && data.results.map((item) => (
+						<option key={item.id} value={item.name} />
+					))}
+				</datalist>
+			</MyGroup>
+			{/* <InvoiceFormSearchField label={'اسم الصنف'} onEnterKeyDown={handleKeyDown} endpotin={'items'} onBlur={handleOnBlur} /> */}
 			<MyGroup label='عدد القطع' feedback={''}>
 				<Form.Control
 					type="number"
@@ -229,9 +238,9 @@ const InvoiceItemsForm = ({ invoice, setInvoices }) => {
 					onKeyDown={(e) => (e.key === 'Enter') && handleOnClickAdd()}
 					value={item.quantity}
 					placeholder="عدد القطع"
-					onChange={handleOnItemsChange}
+					onChange={handleChange}
 					isInvalid={false}
-					onFocus={(e) => e.target.select()}
+					onFocus={handleOnFocus}
 				/>
 			</MyGroup>
 			<MyGroup label='سعر القطعه' feedback={''}>
@@ -241,9 +250,9 @@ const InvoiceItemsForm = ({ invoice, setInvoices }) => {
 					onKeyDown={(e) => (e.key === 'Enter') && handleOnClickAdd()}
 					value={item.unit_price}
 					placeholder="سعر القطعه"
-					onChange={handleOnItemsChange}
+					onChange={handleChange}
 					isInvalid={false}
-					onFocus={(e) => e.target.select()}
+					onFocus={handleOnFocus}
 				/>
 			</MyGroup>	
 
@@ -252,28 +261,25 @@ const InvoiceItemsForm = ({ invoice, setInvoices }) => {
 	)
 }
 
-const InvoiceDetailForm = ({ invoice, setInvoices, errors }) => {
-	const id = invoice.uuid || invoice.id
-
-
+const InvoiceDetailForm = ({ invoice, setInvoices, errors, index }) => {
 	const handleOnChange = (e) => {
 		const {name, value} = e.target
-		setInvoices((prev) => prev.map((inv) => {
-			if ((inv.uuid || inv.id) === id) {
-				inv[name] = value
-			}
-			return inv
-		}))
+		setInvoices((prev) => {
+			const newInvoices = [...prev]
+			const updatedInvoice = {...newInvoices[index]}
+			updatedInvoice[name] = value
+			newInvoices[index] = updatedInvoice
+			return newInvoices
+		})
 	}
 
-	const handleOnBlur1 = (itemsData, name, value) => {
+	const handleOnBlur1 = (itemsData, name) => {
 		if (itemsData.results?.length != 1) {
-			notify('error', `${value} غير موجود...`)
-			setInvoices((prev) => newInvoiceDetail(prev, null, name, id))
+			setInvoices((prev) => updateInvoiceDetail(prev, index, name, null))
 			return
 		}
-
-		setInvoices((prev) => newInvoiceDetail(prev, itemsData, name, id))
+		
+		setInvoices((prev) => updateInvoiceDetail(prev, index, name, itemsData))
 	}
 
 	return (
@@ -286,6 +292,7 @@ const InvoiceDetailForm = ({ invoice, setInvoices, errors }) => {
 			<InvoiceFormSearchField label={'مخزن'} v={invoice.repository_name} name={'repository'} onBlur={handleOnBlur1} endpotin={'repositories'} errors={errors} />
 			<MyGroup label='مدفوع' feedback={errors?.['paid'] ? errors?.['paid'][0] : ''}>
 				<Form.Control
+					onKeyDown={(e) => e.key === 'Enter' && e.target.blur()}
 					type="number"
 					name='paid'
 					value={invoice.paid}
@@ -294,20 +301,46 @@ const InvoiceDetailForm = ({ invoice, setInvoices, errors }) => {
 					isInvalid={errors?.['paid'] ? true : false}
 					onFocus={(e) => e.target.select()}
 				/>
-			</MyGroup>	
+			</MyGroup>
 		</div>
 	)
 }
 
-const newInvoiceDetail = (oldList, itemsData, name, selectedInvoiceId) => (
-	oldList.map((v) => {
-		if ((v.uuid || v.id) === selectedInvoiceId) {
-			v[name] = itemsData?.results[0].id
-			v[name + '_name'] = itemsData?.results[0].name
-		}
-		return v
-	})
-)
-
 
 export default InvoiceForm
+
+
+function addItemToItemsList(items, newItem) {
+	const index = items.findIndex((i) => i.item === newItem.item)
+
+	if (index !== -1) {
+		items[index].quantity = Number(items[index].quantity) + Number(newItem.quantity)
+		items[index].unit_price = newItem.unit_price
+		return items
+	}
+
+	items.push(newItem)
+	return items
+}
+
+const updateInvoiceItems = (invoices, index, newItem) => {
+	const newInvoices = [...invoices]
+	const updatedInvoice = {...newInvoices[index]}
+	updatedInvoice.items = addItemToItemsList(updatedInvoice.items, newItem);
+	updatedInvoice.paid = updatedInvoice.items.reduce((sum, item) => 
+		sum + (item.quantity * item.unit_price)
+	, 0)
+	newInvoices[index] = updatedInvoice;
+
+	return newInvoices
+}
+
+const updateInvoiceDetail = (invoices, index, name, data) => {
+	const newInvoices = [...invoices]
+	const updatedInvoice = {...newInvoices[index]}
+	updatedInvoice[name] = data?.results[0].id
+	updatedInvoice[name + '_name'] = data?.results[0].name
+	newInvoices[index] = updatedInvoice;
+
+	return newInvoices
+}

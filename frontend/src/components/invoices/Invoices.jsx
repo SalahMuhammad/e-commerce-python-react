@@ -10,9 +10,9 @@ import { getCookie, setCookie } from "../utilities.jsx";
 
 
 
-export default function Invoices() {
+export default function Toogle() {
 	const [displayList, setDisplayList]  = useState(0)
-
+	document.title = 'الفواتير'
 
 	// onWheel
 	// onWheel={(e) => {e.preventDefault(); e.currentTarget.scrollLeft += e.deltaY}}

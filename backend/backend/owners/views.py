@@ -5,6 +5,7 @@ from .models import Owner
 from .serializers import CustomerSerializers
 from django.db import IntegrityError
 from django.db.models.deletion import ProtectedError
+from auth.permissions import OwnersPermission
 
 
 
@@ -17,6 +18,7 @@ class OwnersViewset(ModelViewSet):
 class ListCreateView(mixins.ListModelMixin, 
                mixins.CreateModelMixin,
                generics.GenericAPIView):
+    permission_classes = (OwnersPermission, )
     queryset = Owner.objects.all()
     serializer_class = CustomerSerializers
 
@@ -44,6 +46,7 @@ class DetailView(mixins.RetrieveModelMixin,
                  mixins.UpdateModelMixin,
                  mixins.DestroyModelMixin,
                  generics.GenericAPIView):
+    permission_classes = (OwnersPermission, )
     queryset = Owner.objects.all()
     serializer_class = CustomerSerializers
 

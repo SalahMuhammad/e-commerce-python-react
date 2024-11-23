@@ -12,13 +12,23 @@ class CustomAuthentication(BaseAuthentication):
         payload, verification_status = JWTUtilities.verify_jwt(token)
         if not verification_status:
             raise AuthenticationFailed(payload)
+        
+        if request.method.lower() in ('post', 'put', 'patch'):
+            request.data['by'] = payload['id']
 
-        try:
-            user = User.objects.get(pk=payload['id'])
-            # if request.method != 'DELETE':
-            request.data['by'] = user.id
-        except User.DoesNotExist:
-            raise AuthenticationFailed('User not found.')
-            # return None
+        return (None, payload['permissions'])
 
-        return (user, None)
+
+        # try:
+        #     user = User.objects.get(pk=payload['id'])
+        #     permissions = {
+        #         'is_superuser': user.is_superuser,
+        #         'is_staff': user.is_staff  # Note: it's "is_staff" not "is_stuff"
+        #     }
+        #     # if request.method != 'DELETE':
+        #     request.data['by'] = user.id
+        # except User.DoesNotExist:
+        #     raise AuthenticationFailed('User not found.')
+        #     # return None
+
+        # return (user, permissions)

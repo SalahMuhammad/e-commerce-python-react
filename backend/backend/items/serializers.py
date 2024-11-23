@@ -118,7 +118,6 @@ class ItemsSerializer(serializers.ModelSerializer):
 	
 	def update(self, instance, validated_data):
 		images_data = validated_data.pop('images_upload', None)
-		barcodes_data = validated_data.pop('barcodes', None)
 
 		with transaction.atomic():
 			item = super().update(instance, validated_data)
@@ -130,12 +129,6 @@ class ItemsSerializer(serializers.ModelSerializer):
 
 				for img in images_data:
 					item.images.create(img=img)
-
-			if barcodes_data:
-				# ids = [i.get('id', -1) for i in barcodes_data]
-				item.barcodes.all().delete()
-				for b2 in barcodes_data:
-					item.barcodes.create(barcode=b2['barcode'])
 		return item
 
 	# def get_stock(self, obj):

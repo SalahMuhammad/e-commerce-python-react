@@ -10,6 +10,7 @@ import Tooltip from "../common/Tooltip.jsx";
 
 
 export default function ClientSupplier({ isClient }) {
+	document.title = 'العملاء/الموردين'
 	const [url, setUrl] = useState(`api/owners/`)
 	const { data, loading } = useData(url)
 	useScroll(loading, data.next, setUrl)
